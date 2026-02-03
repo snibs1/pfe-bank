@@ -15,14 +15,14 @@ def login():
     if username == "admin" and password == "1234":
         return redirect(url_for('dashboard'))
     else:
-        # تأكد أنك داير flash هنا فقط
+       
         flash("Identifiant ou mot de passe incorrect !", "danger")
         return redirect(url_for('login_page'))
 
-# DASHBOARD 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('index.html')
+    return render_template('dashboard.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
+    

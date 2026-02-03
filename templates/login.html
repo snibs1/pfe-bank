@@ -2,42 +2,183 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Bank AI - Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank AI - Authentification Sécurisée</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { background: linear-gradient(135deg, #2c3e50, #2980b9); height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; }
-        .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; max-width: 400px; }
-        .btn-primary { background: #2c3e50; border: none; width: 100%; padding: 12px; }
-        .logo { width: 80px; margin-bottom: 20px; }
+        :root {
+            --bank-blue: #0f172a;
+            --accent-gold: #fbbf24;
+            --glass-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #f1f5f9;
+        }
+
+        /* الخلفية مقسومة بواحد الزاوية عصرية */
+        .page-wrapper {
+            display: flex;
+            height: 100vh;
+            background: linear-gradient(135deg, var(--bank-blue) 40%, #1e293b 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* الدوائر الزخرفية لي كتعطي جمالية (Decorative elements) */
+        .circle-bg {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 50%;
+            top: -100px;
+            left: -100px;
+        }
+
+        /* الجزء الأيسر: الهوية والترحيب */
+        .brand-panel {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px;
+            color: white;
+            z-index: 10;
+        }
+
+        .brand-panel h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        .brand-panel span { color: var(--accent-gold); }
+
+        /* الجزء الأيمن: الفورم الزجاجي */
+        .form-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            z-index: 10;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            padding: 50px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .form-label { font-weight: 600; color: #334155; margin-bottom: 8px; }
+
+        .form-control {
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            transition: 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: white;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: 0.4s;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+        }
+
+        @media (max-width: 992px) {
+            .brand-panel { display: none; }
+            .page-wrapper { justify-content: center; }
+        }
     </style>
 </head>
 <body>
 
-<div class="login-card text-center">
-    <img src="https://cdn-icons-png.flaticon.com/512/2830/2830284.png" class="logo">
-    <h3 class="mb-4">Espace Employé</h3>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" style="font-size: 0.9rem;">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-    <form action="/login" method="post">
-        <div class="mb-3 text-start">
-            <label class="form-label">Identifiant</label>
-            <input type="text" name="username" class="form-control" placeholder="admin" required>
+    <div class="page-wrapper">
+        <div class="circle-bg"></div>
+        
+        <div class="brand-panel">
+            <p class="text-uppercase fw-bold tracking-widest mb-3" style="color: var(--accent-gold); letter-spacing: 2px;">Bank AI v1.0</p>
+            <h1>Credit <span>Risk</span><br>Intelligence</h1>
+            <p class="fs-5 opacity-75">Solution d'ingénierie de données pour l'analyse prédictive des risques bancaires.</p>
         </div>
-        <div class="mb-4 text-start">
-            <label class="form-label">Mot de passe</label>
-            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+
+        <div class="form-panel">
+            <div class="glass-card">
+                <div class="mb-5">
+                    <h2 class="fw-bold text-dark">Connexion</h2>
+                    <p class="text-muted">Portail réservé aux analystes de la banque.</p>
+                </div>
+
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    {% for message in messages %}
+                      <div class="alert alert-danger py-2 border-0 rounded-3 mb-4" style="font-size: 0.9rem;">
+                        <i class="fas fa-shield-alt me-2"></i> {{ message }}
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+
+                <form action="/login" method="POST">
+                    <div class="mb-4">
+                        <label class="form-label">Identifiant Matricule</label>
+                        <input type="text" name="username" class="form-control" placeholder="Ex: admin" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label">Mot de passe</label>
+                            <a href="#" class="text-decoration-none small text-primary fw-bold">Oublié ?</a>
+                        </div>
+                        <input type="password" name="password" class="form-control" placeholder="••••••••••••" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mb-4 shadow">S'authentifier</button>
+                </form>
+
+                <div class="text-center">
+                    <p class="small text-muted mb-0">© 2026 Bank AI System</p>
+                    <p class="small text-muted">Sécurité SSL 256 bits activée</p>
+                </div>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Se connecter</button>
-    </form>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    </div>
+<script>
+        // هاد الكود كيتسنى الموظف يكليكي على الرابط
+        document.querySelector('.text-primary.fw-bold').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert("🔒 Sécurité :  Veuillez contacter l\'administrateur système (DSI) pour réinitialiser votre compte.");
+        });
+    </script>
+</body>
 </body>
 </html>
