@@ -1,66 +1,265 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bank AI - Dashboard</title>
+    <title>NB Bank IA - Credit Risk Analytics</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
-        .sidebar { height: 100vh; background: #2c3e50; color: white; padding-top: 20px; }
-        .sidebar a { color: white; text-decoration: none; padding: 15px; display: block; }
-        .sidebar a:hover { background: #34495e; }
-        .card-stat { border: none; border-radius: 15px; transition: 0.3s; }
-        .card-stat:hover { transform: translateY(-5px); }
-        .btn-primary { background-color: #2980b9; border: none; }
+        :root {
+            --main-blue: #2563eb;
+            --dark-navy: #0f172a;
+            --soft-bg: #f8fafc;
+        }
+
+        body {
+            background-color: var(--soft-bg);
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            background: linear-gradient(180deg, var(--dark-navy) 0%, #1e293b 100%);
+            position: fixed;
+            color: white;
+            padding: 30px 20px;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .sidebar h3 {
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 50px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 15px !important;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white !important;
+            transform: translateX(5px);
+        }
+
+        .nav-link.active {
+            background: var(--main-blue);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 260px;
+            padding: 40px;
+        }
+
+        /* Modern Glass Cards */
+        .glass-card {
+            background: white;
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 25px;
+            transition: transform 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* KPI Cards Styling */
+        .kpi-card {
+            border-top: 5px solid var(--main-blue);
+        }
+
+        .kpi-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #64748b;
+            font-weight: 700;
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+            margin-top: 5px;
+        }
+
+        /* Header Search Bar */
+        .search-bar {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 50px;
+            padding: 10px 25px;
+            width: 350px;
+            outline: none;
+            transition: 0.3s;
+        }
+        
+        .search-bar:focus {
+            border-color: var(--main-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .chart-wrapper {
+            height: 350px;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-2 sidebar d-none d-md-block">
-            <h4 class="text-center">BANK AI</h4>
-            <hr>
-            <a href="/">🏠 Dashboard</a>
-            <a href="/simulate">📊 Nouveau Prêt</a>
-            <a href="/history">📂 Historique</a>
+    <div class="sidebar">
+        <h3><i class="fas fa-brain me-2"></i> NB BANK IA</h3>
+        <nav class="nav flex-column">
+            <a href="#" class="nav-link active"><i class="fas fa-chart-pie me-2"></i> Overview</a>
+            <a href="/simulation" class="nav-link"><i class="fas fa-microchip me-2"></i> AI Simulation</a>
+            <a href="#" class="nav-link"><i class="fas fa-database me-2"></i> Historical Data</a>
+            <a href="#" class="nav-link"><i class="fas fa-bell me-2"></i> Risk Alerts</a>
+            <hr class="text-white-50 my-4">
+            <a href="/" class="nav-link text-danger"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold mb-0">Credit Risk Dashboard</h2>
+                <p class="text-muted">Real-time predictive analytics powered by Deep Learning</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <input type="text" class="search-bar" placeholder="Search Client ID or Name...">
+                <button class="btn btn-primary rounded-pill px-4 shadow-sm">Search</button>
+            </div>
         </div>
 
-        <div class="col-md-10 p-4">
-            <h2 class="mb-4">Tableau de Bord</h2>
-            
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="card card-stat bg-white p-3 shadow-sm">
-                        <h6 class="text-muted">Total des Demandes</h6>
-                        <h3>1,284</h3>
-                    </div>
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="glass-card kpi-card">
+                    <div class="kpi-title">Total Clients</div>
+                    <div class="kpi-value">31,678</div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card card-stat bg-success text-white p-3 shadow-sm">
-                        <h6>Prêts Approuvés</h6>
-                        <h3>85%</h3>
-                    </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card kpi-card" style="border-top-color: #ef4444;">
+                    <div class="kpi-title">Defaulting Clients</div>
+                    <div class="kpi-value">6,825</div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card card-stat bg-danger text-white p-3 shadow-sm">
-                        <h6>Risque Moyen</h6>
-                        <h3>12%</h3>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card kpi-card" style="border-top-color: #10b981;">
+                    <div class="kpi-title">Total Loan Volume</div>
+                    <div class="kpi-value">$306M</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card kpi-card" style="border-top-color: #f59e0b;">
+                    <div class="kpi-title">Average Loan</div>
+                    <div class="kpi-value">$9,660</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="glass-card">
+                    <h5 class="fw-bold mb-4">Risk Exposure Trend (Monthly)</h5>
+                    <div class="chart-wrapper">
+                        <canvas id="riskTrendChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white p-5 rounded-4 shadow-sm text-center">
-                <img src="https://cdn-icons-png.flaticon.com/512/2830/2830284.png" width="100" class="mb-3">
-                <h3>Bienvenue dans le Système d'Analyse de Prêt</h3>
-                <p class="text-muted">Utilisez notre intelligence artificielle pour évaluer la solvabilité des clients en temps réel.</p>
-                <a href="/simulate" class="btn btn-primary btn-lg px-5 mt-3">Lancer une Simulation</a>
+            <div class="col-md-4">
+                <div class="glass-card text-center">
+                    <h5 class="fw-bold mb-4">Latest Model Prediction</h5>
+                    <img src="https://i.ibb.co/Lhb8YpC/risk-gauge.jpg" class="img-fluid rounded mb-3 shadow-sm" style="max-height: 200px;">
+                    <div class="mt-2">
+                        <span class="badge bg-danger p-2 fs-6 w-100">CRITICAL RISK DETECTED</span>
+                    </div>
+                    <div class="mt-4 p-3 bg-light rounded-3 text-start">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted small">Risk Probability:</span>
+                            <span class="fw-bold text-danger">58.8%</span>
+                        </div>
+                        <div class="progress mt-2" style="height: 8px;">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: 58.8%"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const ctx = document.getElementById('riskTrendChart').getContext('2d');
+        
+        // Gradient for the Curve
+        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(37, 99, 235, 0.3)');
+        gradient.addColorStop(1, 'rgba(37, 99, 235, 0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Mean Risk Score (%)',
+                    data: [18, 24, 21, 52, 38, 65, 45, 55, 40, 32, 22, 27],
+                    borderColor: '#2563eb',
+                    borderWidth: 3,
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#2563eb'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        title: { display: true, text: 'Months (2025/2026)', color: '#64748b' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) { return value + '%'; }
+                        },
+                        title: { display: true, text: 'Probability Percentage', color: '#64748b' }
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
