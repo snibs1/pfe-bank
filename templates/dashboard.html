@@ -58,24 +58,28 @@
             margin-bottom: 10px;
             font-weight: 500;
             transition: 0.3s all cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
         }
 
-        .nav-link i { margin-right: 12px; font-size: 1.1rem; }
+        .nav-link i { margin-right: 12px; font-size: 1.1rem; width: 25px; text-align: center; }
 
-        .nav-link:hover, .nav-link.active {
-            background: rgba(56, 189, 248, 0.08);
+        .nav-link:hover {
+            background: rgba(56, 189, 248, 0.05);
             color: var(--accent-blue) !important;
             transform: translateX(5px);
         }
 
+        
         .nav-link.active {
-            background: linear-gradient(90deg, rgba(56, 189, 248, 0.15), rgba(129, 140, 248, 0.15));
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.15), rgba(129, 140, 248, 0.15)) !important;
             border: 1px solid rgba(56, 189, 248, 0.2);
+            color: var(--accent-blue) !important;
             font-weight: 700;
         }
 
         
-        .main-content { margin-left: 280px; padding: 40px; }
+        .main-content { margin-left: 280px; padding: 40px; min-height: 100vh; }
 
         .header-section h2 {
             font-weight: 800;
@@ -97,40 +101,24 @@
             transition: 0.4s ease;
         }
 
-        .glass-card:hover {
-            border-color: rgba(56, 189, 248, 0.3);
-            box-shadow: 0 25px 50px rgba(56, 189, 248, 0.1);
-            transform: translateY(-5px);
-        }
-
-        
         .icon-box {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            font-size: 1.3rem;
+            width: 52px; height: 52px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px; font-size: 1.3rem;
         }
 
-        .bg-blue-glow { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
-        .bg-red-glow { background: rgba(248, 113, 113, 0.15); color: #f87171; box-shadow: 0 0 15px rgba(248, 113, 113, 0.2); }
-        .bg-green-glow { background: rgba(16, 185, 129, 0.15); color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
-        .bg-purple-glow { background: rgba(129, 140, 248, 0.15); color: var(--accent-purple); box-shadow: 0 0 15px rgba(129, 140, 248, 0.2); }
+        .bg-blue-glow { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); }
+        .bg-red-glow { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+        .bg-green-glow { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .bg-purple-glow { background: rgba(129, 140, 248, 0.15); color: var(--accent-purple); }
 
         .kpi-title { font-size: 0.85rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
         .kpi-value { font-family: 'JetBrains Mono', monospace; font-size: 1.8rem; font-weight: 700; color: #fff; margin-top: 5px; }
 
         .status-badge {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            border: 1px solid rgba(16, 185, 129, 0.2);
+            background: rgba(16, 185, 129, 0.1); color: #10b981;
+            padding: 8px 16px; border-radius: 100px; font-size: 0.8rem;
+            font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         .logout-section { position: absolute; bottom: 30px; width: 240px; }
@@ -141,17 +129,17 @@
     <div class="sidebar">
         <h3><i class="fas fa-bolt-lightning me-2"></i> NB BANK IA</h3>
         <nav class="nav flex-column mt-4">
-            <a href="{{ url_for('dashboard') }}" class="nav-link active">
+            <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
                 <i class="fas fa-layer-group"></i> Overview
             </a>
-            <a href="{{ url_for('simulation') }}" class="nav-link">
+            <a href="{{ url_for('simulation') }}" class="nav-link {% if request.endpoint == 'simulation' %}active{% endif %}">
                 <i class="fas fa-microchip"></i> AI Simulation
             </a>
             <a href="#" class="nav-link"><i class="fas fa-chart-line"></i> Analytics</a>
             <a href="#" class="nav-link"><i class="fas fa-shield-halved"></i> Security</a>
             
             <div class="logout-section">
-                <a href="{{ url_for('login_page') }}" class="nav-link text-danger">
+                <a href="/" class="nav-link text-danger">
                     <i class="fas fa-power-off"></i> Déconnexion
                 </a>
             </div>
@@ -221,20 +209,11 @@
                             <small class="text-dim">CPU Neural Load</small>
                             <small class="text-white">42%</small>
                         </div>
-                        <div class="progress bg-dark" style="height: 6px; border-radius: 10px;">
-                            <div class="progress-bar" style="width: 42%; background: var(--accent-blue); box-shadow: 0 0 10px var(--accent-blue);"></div>
+                        <div class="progress bg-dark" style="height: 6px;">
+                            <div class="progress-bar" style="width: 42%; background: var(--accent-blue);"></div>
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between mb-2">
-                            <small class="text-dim">VRAM Usage</small>
-                            <small class="text-white">68%</small>
-                        </div>
-                        <div class="progress bg-dark" style="height: 6px; border-radius: 10px;">
-                            <div class="progress-bar" style="width: 68%; background: var(--accent-purple); box-shadow: 0 0 10px var(--accent-purple);"></div>
-                        </div>
-                    </div>
-                    <div class="mt-5 p-4 rounded-4 bg-black bg-opacity-20 border border-white border-opacity-5 text-center">
+                    <div class="mt-5 p-4 rounded-4 bg-black bg-opacity-20 text-center border border-white border-opacity-5">
                         <small class="text-dim d-block mb-1">Latency Avg</small>
                         <span class="fw-bold text-white fs-4" style="font-family: 'JetBrains Mono';">42ms</span>
                     </div>
@@ -248,40 +227,21 @@
     <script>
         const ctx = document.getElementById('riskTrendChart')?.getContext('2d');
         if(ctx) {
-            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(56, 189, 248, 0.25)');
-            gradient.addColorStop(1, 'rgba(56, 189, 248, 0)');
-
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                     datasets: [{
-                        label: 'Risk Vector',
+                        label: 'Risk',
                         data: [20, 25, 22, 48, 38, 55],
                         borderColor: '#38bdf8',
-                        borderWidth: 4,
-                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        tension: 0.4,
                         fill: true,
-                        tension: 0.45,
-                        pointRadius: 0
+                        backgroundColor: 'rgba(56, 189, 248, 0.05)'
                     }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { 
-                            grid: { color: 'rgba(255,255,255,0.03)' },
-                            ticks: { color: '#64748b', font: { size: 11 } }
-                        },
-                        x: { 
-                            grid: { display: false },
-                            ticks: { color: '#64748b', font: { size: 11 } }
-                        }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
     </script>
