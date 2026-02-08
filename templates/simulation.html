@@ -1,0 +1,107 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+<div class="header-section mb-5">
+    <h2 class="fw-bold m-0">AI Credit Assessment</h2>
+    <p class="text-dim">Simulez le risque de crédit en utilisant 13 variables prédictives.</p>
+</div>
+
+<div class="glass-card">
+    <form id="simulationForm">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <label class="kpi-title mb-2 d-block">Annual Income ($)</label>
+                <input type="number" name="annual_income" class="form-control pro-input shadow-none" placeholder="Ex: 55000" required>
+            </div>
+            <div class="col-md-4">
+                <label class="kpi-title mb-2 d-block">Credit Score</label>
+                <input type="number" name="credit_score" class="form-control pro-input shadow-none" placeholder="300-850" required>
+            </div>
+            <div class="col-md-4">
+                <label class="kpi-title mb-2 d-block">Debt-to-Income Ratio</label>
+                <input type="number" step="0.01" name="debt_to_income_ratio" class="form-control pro-input shadow-none" placeholder="Ex: 0.25" required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="kpi-title mb-2 d-block">Loan Amount ($)</label>
+                <input type="number" name="loan_amount" class="form-control pro-input shadow-none" required>
+            </div>
+            <div class="col-md-6">
+                <label class="kpi-title mb-2 d-block">Interest Rate (%)</label>
+                <input type="number" step="0.01" name="interest_rate" class="form-control pro-input shadow-none" required>
+            </div>
+
+            <div class="col-md-4">
+                <label class="kpi-title mb-2 d-block">Gender</label>
+                <select name="gender" class="form-select pro-input shadow-none">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="kpi-title mb-2 d-block">Marital Status</label>
+                <select name="marital_status" class="form-select pro-input shadow-none">
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="kpi-title mb-2 d-block">Employment</label>
+                <select name="employment_status" class="form-select pro-input shadow-none">
+                    <option value="Employed">Employed</option>
+                    <option value="Self-Employed">Self-Employed</option>
+                </select>
+            </div>
+
+            <div class="col-12 mt-5">
+                <button type="submit" class="btn btn-ai w-100 shadow-sm">
+                    <i class="fas fa-bolt me-2"></i> ÉVALUER LE RISQUE
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div id="resultArea" class="mt-5 d-none p-4 rounded-4 bg-light border text-center animate__animated animate__fadeIn">
+        <h3 id="statusLabel" class="fw-bold mb-3"></h3>
+        <div class="d-flex justify-content-center align-items-center">
+            <div class="display-6 fw-bold text-primary" id="riskScoreValue"></div>
+            <span class="ms-2 text-muted">de probabilité de risque</span>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('simulationForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> ANALYSE EN COURS...';
+    btn.disabled = true;
+
+    try {
+        const formData = new FormData(e.target);
+        const response = await fetch('/predict', { method: 'POST', body: formData });
+        const res = await response.json();
+        
+        const resultArea = document.getElementById('resultArea');
+        resultArea.classList.remove('d-none');
+        
+        const label = document.getElementById('statusLabel');
+        const val = document.getElementById('riskScoreValue');
+
+        if(res.status === 'Approved') {
+            label.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> PRÊT APPROUVÉ</span>';
+            val.style.color = "#16a34a";
+        } else {
+            label.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle"></i> PRÊT REJETÉ</span>';
+            val.style.color = "#dc2626";
+        }
+        val.innerText = res.risk_score + "%";
+    } catch (err) {
+        alert("Erreur de connexion au serveur AI");
+    } finally {
+        btn.innerHTML = '<i class="fas fa-bolt me-2"></i> ÉVALUER LE RISQUE';
+        btn.disabled = false;
+    }
+};
+</script>
+{% endblock %}
