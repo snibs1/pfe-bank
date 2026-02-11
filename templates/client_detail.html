@@ -1,0 +1,71 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <a href="{{ url_for('requests_list') }}" class="btn btn-outline-secondary rounded-pill">
+        <i class="fas fa-arrow-left me-2"></i>Retour
+    </a>
+    <button onclick="generatePDF()" class="btn btn-info fw-bold rounded-pill px-4">
+        <i class="fas fa-file-pdf me-2"></i>Télécharger PDF
+    </button>
+</div>
+
+<div id="pdfContent" class="glass-card p-5" style="background: #0b1120;">
+    <div class="border-bottom border-white border-opacity-10 pb-4 mb-4 d-flex justify-content-between">
+        <div>
+            <h3 class="text-white fw-800 m-0">RAPPORT D'ANALYSE</h3>
+            <p class="text-dim m-0">Réf: SIM-{{ client.id }}</p>
+        </div>
+        <div class="text-end">
+            <h5 class="text-info m-0">NB BANK IA</h5>
+            <small class="text-dim">{{ client.date_added.strftime('%d/%m/%Y') }}</small>
+        </div>
+    </div>
+
+    <div class="row g-5">
+        <div class="col-md-6">
+            <h6 class="text-info text-uppercase mb-3 ps-2 border-start border-info border-3">Client</h6>
+            <ul class="list-unstyled text-white">
+                <li class="mb-2"><span class="text-dim w-50 d-inline-block">Nom:</span> <strong>{{ client.client_name }}</strong></li>
+                <li class="mb-2"><span class="text-dim w-50 d-inline-block">CIN:</span> <strong>{{ client.cin }}</strong></li>
+                <li class="mb-2"><span class="text-dim w-50 d-inline-block">Tél:</span> {{ client.phone }}</li>
+                <li class="mb-2"><span class="text-dim w-50 d-inline-block">Revenu:</span> {{ client.annual_income }} MAD</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h6 class="text-info text-uppercase mb-3 ps-2 border-start border-info border-3">Crédit</h6>
+            <ul class="list-unstyled text-white">
+                <li class="mb-2"><span class="text-dim w-50 d-inline-block">Montant:</span> <strong>{{ client.loan_amount }} MAD</strong></li>
+                <li class="mb-2"><span class="text-dim w-50 d-inline-block">Durée:</span> {{ client.loan_term }} Mois</li>
+                <li class="mb-2"><span class="text-dim w-50 d-inline-block">Intérêt:</span> {{ client.interest_rate }}%</li>
+                <li class="mb-2"><span class="text-dim w-50 d-inline-block">Score FICO:</span> {{ client.credit_score }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="mt-4 p-4 rounded-4 text-center border {% if client.status == 'Approved' %}border-success bg-success{% else %}border-danger bg-danger{% endif %} bg-opacity-10">
+        <h5 class="text-dim mb-2">DÉCISION DU SYSTÈME</h5>
+        {% if client.status == 'Approved' %}
+            <h1 class="text-success fw-900 mb-0">CRÉDIT APPROUVÉ</h1>
+            <p class="text-success mt-2 mb-0">Risque: {{ client.risk_score }}% (Faible)</p>
+        {% else %}
+            <h1 class="text-danger fw-900 mb-0">CRÉDIT REFUSÉ</h1>
+            <p class="text-danger mt-2 mb-0">Risque: {{ client.risk_score }}% (Élevé)</p>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+function generatePDF() {
+    const element = document.getElementById('pdfContent');
+    const opt = {
+        margin: 0.5,
+        filename: 'Rapport_{{ client.client_name }}.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#0b1120' },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+}
+</script>
+{% endblock %}

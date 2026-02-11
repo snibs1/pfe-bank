@@ -3,162 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NB Bank IA | Secure Authentication Portal</title>
+    <title>NB Bank IA | Secure Authentication</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --bg-deep: #020617;
-            --accent-cyan: #22d3ee;
-            --accent-blue: #38bdf8;
-            --glass-bg: rgba(15, 23, 42, 0.88);
-            --text-dim: #94a3b8;
-        }
-
-        body, html {
-            height: 100%;
-            margin: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            color: #fff;
-            overflow: hidden;
-        }
-
-        
-        .page-wrapper {
-            display: flex;
-            height: 100vh;
-            background: 
-                linear-gradient(90deg, rgba(2,6,23,0.98) 35%, rgba(2,6,23,0.6) 100%),
-                url("https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80") center/cover no-repeat;
-            position: relative;
-        }
-
-        
-        .particles { position: absolute; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
-        .particle { position: absolute; background: rgba(56, 189, 248, 0.15); border-radius: 50%; animation: float 15s infinite linear; }
-        @keyframes float {
-            0% { transform: translateY(0); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-100vh); opacity: 0; }
-        }
-
-        
-        .brand-section {
-            flex: 1.2;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 80px;
-            z-index: 2;
-        }
-
-        .brand-badge {
-            background: rgba(34, 211, 238, 0.1);
-            color: var(--accent-cyan);
-            border: 1px solid rgba(34, 211, 238, 0.2);
-            padding: 8px 18px;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            width: fit-content;
-            margin-bottom: 25px;
-            backdrop-filter: blur(10px);
-        }
-
-        .brand-title {
-            font-size: 4rem;
-            font-weight: 800;
-            line-height: 1.1;
-            letter-spacing: -2px;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #fff 0%, var(--accent-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            max-width: 550px;
-            margin-top: 30px;
-        }
-
-        .feature-box {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 15px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: 0.3s;
-        }
-        .feature-box:hover { background: rgba(56, 189, 248, 0.1); border-color: var(--accent-blue); }
-        .feature-box i { color: var(--accent-blue); font-size: 1.2rem; }
-
-        
-        .form-section {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            z-index: 2;
-        }
-
-        .login-card {
-            width: 100%;
-            max-width: 440px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 28px;
-            padding: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
-            text-align: center;
-        }
-
-        .login-card i.bi-fingerprint {
-            font-size: 3.5rem;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 15px rgba(34, 211, 238, 0.4));
-        }
-
-        .form-control {
-            background-color: rgba(2, 6, 23, 0.6) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: #fff !important;
-            padding: 15px 18px;
-            border-radius: 14px;
-            transition: 0.3s;
-        }
-        .form-control:focus { border-color: var(--accent-cyan) !important; box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.1) !important; }
-
-        .btn-ai {
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            border: none; padding: 15px; border-radius: 14px; font-weight: 800; color: #020617;
-            transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        .btn-ai:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(34, 211, 238, 0.3); }
-
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            margin-top: 35px;
-            padding-top: 25px;
-            border-top: 1px solid rgba(255,255,255,0.08);
-        }
-        .stat-val { display: block; font-weight: 800; color: var(--accent-cyan); font-size: 1.1rem; }
-        .stat-lbl { font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); }
-
-        @media (max-width: 992px) { .brand-section { display: none; } }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 </head>
 <body>
 
@@ -168,46 +19,30 @@
         <div class="brand-section">
             <div class="brand-badge"><i class="bi bi-shield-lock-fill me-2"></i> BANK-LEVEL SECURITY</div>
             <h1 class="brand-title">NB BANK<br>INTELLIGENCE</h1>
-            <p>Empowering financial decisions through high-fidelity machine learning. Our system provides probabilistic risk vectors with unmatched precision.</p>
+            <p>Empowering financial decisions through high-fidelity machine learning.</p>
             
             <div class="features-grid">
                 <div class="feature-box"><i class="bi bi-cpu"></i> <span>Neural Inference</span></div>
                 <div class="feature-box"><i class="bi bi-graph-up"></i> <span>Live Analytics</span></div>
-                <div class="feature-box"><i class="bi bi-lightning-charge"></i> <span>42ms Latency</span></div>
-                <div class="feature-box"><i class="bi bi-safe2"></i> <span>AES-256 Encrypted</span></div>
             </div>
         </div>
 
         <div class="form-section">
             <div class="login-card">
                 <i class="bi bi-fingerprint"></i>
-                <h2 class="fw-bold mt-4 mb-1">Secure Sign In</h2>
+                <h2 class="fw-bold mt-4 mb-1 text-white">Secure Sign In</h2>
                 <p class="text-secondary small mb-4">Authorized Personnel Only</p>
-
-                {% with messages = get_flashed_messages() %}
-                  {% if messages %}
-                    {% for message in messages %}
-                      <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-20 text-danger small mb-4 p-2 rounded-3">
-                        <i class="bi bi-exclamation-circle me-2"></i> {{ message }}
-                      </div>
-                    {% endfor %}
-                  {% endif %}
-                {% endwith %}
 
                 <form method="POST" action="/login">
                     <div class="mb-3 text-start">
-                        <label class="form-label small fw-bold text-secondary">EMPLOYEE ID</label>
+                        <label class="small fw-bold text-secondary">EMPLOYEE ID</label>
                         <input type="text" name="username" class="form-control shadow-none" placeholder="admin" required>
                     </div>
-
                     <div class="mb-4 text-start">
-                        <label class="form-label small fw-bold text-secondary">ACCESS KEY</label>
+                        <label class="small fw-bold text-secondary">ACCESS KEY</label>
                         <input type="password" name="password" class="form-control shadow-none" placeholder="••••••••" required>
                     </div>
-
-                    <button type="submit" class="btn btn-ai w-100">
-                        AUTHENTICATE <i class="bi bi-arrow-right"></i>
-                    </button>
+                    <button type="submit" class="btn btn-ai">AUTHENTICATE <i class="bi bi-arrow-right"></i></button>
                 </form>
 
                 <div class="stats-row">
@@ -219,24 +54,6 @@
         </div>
     </div>
 
-    <script>
-        
-        function initParticles() {
-            const container = document.getElementById('particles');
-            for(let i=0; i<25; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                const size = Math.random() * 8 + 4;
-                p.style.width = size + 'px';
-                p.style.height = size + 'px';
-                p.style.left = Math.random() * 100 + '%';
-                p.style.bottom = '-10%';
-                p.style.animationDuration = (Math.random() * 10 + 10) + 's';
-                p.style.animationDelay = Math.random() * 5 + 's';
-                container.appendChild(p);
-            }
-        }
-        window.addEventListener('DOMContentLoaded', initParticles);
-    </script>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 </body>
 </html>

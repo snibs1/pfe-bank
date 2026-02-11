@@ -1,0 +1,50 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div class="header-section mb-5">
+    <h2 class="text-white fw-800">Base de Données Clients</h2>
+    <p class="text-dim">Historique complet des simulations de crédit.</p>
+</div>
+
+<div class="glass-card p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-dark table-hover mb-0" style="background: transparent;">
+            <thead>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <th class="p-4 text-info">CLIENT</th>
+                    <th class="p-4 text-info">CIN</th>
+                    <th class="p-4 text-info">MONTANT</th>
+                    <th class="p-4 text-info">RISQUE</th>
+                    <th class="p-4 text-info">STATUT</th>
+                    <th class="p-4 text-info text-end">ACTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td class="p-4 fw-bold text-white">{{ client.client_name }}</td>
+                    <td class="p-4 text-dim">{{ client.cin }}</td>
+                    <td class="p-4">{{ client.loan_amount }} MAD</td>
+                    <td class="p-4">
+                        <span class="badge {% if client.risk_score > 50 %}bg-danger{% else %}bg-success{% endif %} bg-opacity-20">
+                            {{ client.risk_score }}%
+                        </span>
+                    </td>
+                    <td class="p-4">
+                        {% if client.status == 'Approved' %}
+                            <span class="text-success"><i class="fas fa-check-circle me-2"></i>Accordé</span>
+                        {% else %}
+                            <span class="text-danger"><i class="fas fa-times-circle me-2"></i>Refusé</span>
+                        {% endif %}
+                    </td>
+                    <td class="p-4 text-end">
+                        <a href="{{ url_for('client_detail', id=client.id) }}" class="btn btn-sm btn-outline-info rounded-pill px-3">
+                            Voir <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
