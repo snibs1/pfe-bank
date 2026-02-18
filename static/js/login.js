@@ -1,19 +1,43 @@
-function initParticles() {
-    const container = document.getElementById('particles');
-    if (!container) return;
 
-    for(let i=0; i<25; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        const size = Math.random() * 8 + 4;
-        p.style.width = size + 'px';
-        p.style.height = size + 'px';
-        p.style.left = Math.random() * 100 + '%';
-        p.style.bottom = '-10%';
-        p.style.animationDuration = (Math.random() * 10 + 10) + 's';
-        p.style.animationDelay = Math.random() * 5 + 's';
-        container.appendChild(p);
+
+
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('bi-eye');
+        toggleIcon.classList.add('bi-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('bi-eye-slash');
+        toggleIcon.classList.add('bi-eye');
     }
 }
 
-document.addEventListener('DOMContentLoaded', initParticles);
+
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            const submitBtn = loginForm.querySelector('.btn-login');
+            submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise rotating"></i> <span>Connexion...</span>';
+            submitBtn.disabled = true;
+        });
+    }
+});
+
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .rotating {
+        animation: rotate 1s linear infinite;
+    }
+`;
+document.head.appendChild(style);

@@ -3,109 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NB Bank IA | Intelligence Center</title>
+    <title>NB Bank IA | Tableau de Bord</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/simulation.css') }}">
 </head>
 <body>
-
+    
     <div class="sidebar">
-        <h3><i class="fas fa-bolt-lightning me-2"></i> NB BANK IA</h3>
-        <nav class="nav flex-column mt-4">
-            <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                <i class="fas fa-layer-group"></i> Overview
-            </a>
-            <a href="{{ url_for('simulation') }}" class="nav-link {% if request.endpoint == 'simulation' %}active{% endif %}">
-                <i class="fas fa-microchip"></i> AI Simulation
-            </a>
-            <a href="{{ url_for('requests_list') }}" class="nav-link">
-                <i class="fas fa-address-book"></i> Base Clients
-            </a>
-            <a href="#" class="nav-link"><i class="fas fa-chart-line"></i> Analytics</a>
-            <a href="#" class="nav-link"><i class="fas fa-shield-halved"></i> Security</a>
-            
-            <div class="logout-section">
-                <a href="/" class="nav-link text-danger">
-                    <i class="fas fa-power-off"></i> Déconnexion
-                </a>
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="bi bi-shield-check"></i>
+                <span>NB BANK IA</span>
             </div>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>System Online</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('simulation') }}" class="nav-item {% if request.endpoint == 'simulation' %}active{% endif %}">
+                <i class="bi bi-cpu"></i>
+                <span>AI Simulation</span>
+            </a>
+            <a href="{{ url_for('requests_list') }}" class="nav-item {% if request.endpoint == 'requests_list' %}active{% endif %}">
+                <i class="bi bi-people"></i>
+                <span>Base Clients</span>
+            </a>
         </nav>
+
+        <div class="sidebar-footer">
+            <a href="/" class="logout-btn">
+                <i class="bi bi-box-arrow-left"></i>
+                <span>Déconnexion</span>
+            </a>
+        </div>
     </div>
 
+    
     <div class="main-content">
         {% block content %}
-<div class="header-section mb-5 d-flex justify-content-between align-items-center">
-    <div>
-        <h2 class="m-0">Risk Intelligence Center</h2>
-        <p class="text-dim">Surveillance des vecteurs de risque IA en temps réel.</p>
-    </div>
-    <div class="status-badge"><i class="fas fa-bolt me-2"></i> ENGINE V2.4 ONLINE</div>
-</div>
+        
+        <div class="welcome-section">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="page-title">Centre d'Intelligence Bancaire</h1>
+                    <p class="page-subtitle">Système de prédiction de risque de crédit basé sur l'apprentissage automatique</p>
+                </div>
+                <div class="col-lg-4 text-end">
+                    <div class="system-badge">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                        <div>
+                            <div class="badge-title">XGBoost Engine</div>
+                            <div class="badge-subtitle">v2.4 - Production</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="glass-card"><div class="kpi-title">Clients</div><div class="kpi-value">31,678</div></div>
-    </div>
-    <div class="col-md-3">
-        <div class="glass-card"><div class="kpi-title text-danger">Alertes</div><div class="kpi-value">6,825</div></div>
-    </div>
-    <div class="col-md-3">
-        <div class="glass-card"><div class="kpi-title text-success">Volume</div><div class="kpi-value">$306M</div></div>
-    </div>
-    <div class="col-md-3">
-        <div class="glass-card"><div class="kpi-title text-info">Précision</div><div class="kpi-value">91.2%</div></div>
-    </div>
-</div>
-
-<div class="row g-4">
-    <div class="col-lg-8">
-        <div class="glass-card">
-            <h5 class="fw-bold mb-4 text-white">Inference Trend Analysis</h5>
-            <div style="height: 350px;">
-                <canvas id="riskTrendChart"></canvas>
+            
+            <div class="about-platform">
+                <div class="row g-4">
+                    <div class="col-lg-3">
+                        <div class="info-card">
+                            <div class="info-icon blue">
+                                <i class="bi bi-diagram-3"></i>
+                            </div>
+                            <h3>Architecture ML</h3>
+                            <p>Modèle XGBoost entraîné sur +50,000 dossiers de crédit avec validation croisée</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="info-card">
+                            <div class="info-icon purple">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <h3>Performance</h3>
+                            <p>Précision de 91.2% avec latence moyenne de 42ms pour l'inférence</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="info-card">
+                            <div class="info-icon green">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <h3>Sécurité</h3>
+                            <p>Données chiffrées, conformité bancaire et traçabilité complète</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="info-card">
+                            <div class="info-icon orange">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <h3>Temps Réel</h3>
+                            <p>Analyse instantanée avec historique détaillé de toutes les décisions</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-lg-4">
-        <div class="glass-card mb-4">
-            <h6 class="fw-bold mb-4">System Integrity</h6>
-            <div class="progress-container">
-                <div class="progress-label"><span>Neural Engine Load</span><span>42%</span></div>
-                <div class="progress"><div class="progress-bar bg-info" style="width: 42%"></div></div>
+        
+        <div class="kpis-section">
+            <div class="section-header mb-4">
+                <h3 class="section-title">Métriques Clés</h3>
+                <p class="section-subtitle">Performances du système en temps réel</p>
             </div>
-            <div class="progress-container">
-                <div class="progress-label"><span>VRAM Usage</span><span>68%</span></div>
-                <div class="progress"><div class="progress-bar bg-purple-glow" style="width: 68%; background:#818cf8;"></div></div>
-            </div>
-            <div class="latency-card">
-                <small class="text-dim d-block mb-1">AVG LATENCY</small>
-                <span class="fw-bold fs-3" style="font-family: 'JetBrains Mono';">42ms</span>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon blue">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div class="kpi-trend positive">
+                                <i class="bi bi-arrow-up-short"></i> Active
+                            </div>
+                        </div>
+                        <div class="kpi-content">
+                            <div class="kpi-value">{{ "{:,}".format(total_clients) }}</div>
+                            <div class="kpi-label">Total Clients</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon red">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            </div>
+                            <div class="kpi-trend {% if high_risk_count < 10 %}positive{% else %}negative{% endif %}">
+                                <i class="bi bi-{% if high_risk_count < 10 %}arrow-down-short{% else %}arrow-up-short{% endif %}"></i> Risque
+                            </div>
+                        </div>
+                        <div class="kpi-content">
+                            <div class="kpi-value">{{ "{:,}".format(high_risk_count) }}</div>
+                            <div class="kpi-label">Alertes Risque</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon green">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                            <div class="kpi-trend positive">
+                                <i class="bi bi-arrow-up-short"></i> Croissance
+                            </div>
+                        </div>
+                        <div class="kpi-content">
+                            <div class="kpi-value">{{ "{:.1f}".format(total_volume) }}M MAD</div>
+                            <div class="kpi-label">Volume Prêts</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon purple">
+                                <i class="bi bi-cpu-fill"></i>
+                            </div>
+                            <div class="kpi-trend positive">
+                                <i class="bi bi-arrow-up-short"></i> Optimal
+                            </div>
+                        </div>
+                        <div class="kpi-content">
+                            <div class="kpi-value">{{ "{:.1f}".format(accuracy) }}%</div>
+                            <div class="kpi-label">Précision ML</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="glass-card">
-            <h6 class="fw-bold mb-3">Dernières Alertes</h6>
-            <div class="alert-item">
-                <div class="alert-dot bg-high"></div>
-                <div class="small">Pattern suspect détecté <br><span class="text-dim">ID: #4829 - $12K</span></div>
+        
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="chart-card">
+                    <div class="card-header-custom">
+                        <h3>Analyse des Tendances de Risque</h3>
+                        <div class="chart-legend">
+                            <span class="legend-item">
+                                <span class="legend-dot blue"></span>
+                                Vecteur de Risque
+                            </span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="riskTrendChart"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="alert-item">
-                <div class="alert-dot bg-medium"></div>
-                <div class="small">Dépassement limite DTI <br><span class="text-dim">Client: Ahmed B.</span></div>
+
+            <div class="col-lg-4">
+               
+                <div class="chart-card">
+                    <div class="card-header-custom">
+                        <h3>Santé du Système</h3>
+                    </div>
+                    <div class="system-metrics">
+                        <div class="metric-item">
+                            <div class="metric-label">
+                                <span>Charge CPU</span>
+                                <span class="metric-value" id="cpuUsage">42%</span>
+                            </div>
+                            <div class="progress-bar-custom">
+                                <div class="progress-fill blue" id="cpuBar" style="width: 42%"></div>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">
+                                <span>Utilisation RAM</span>
+                                <span class="metric-value" id="ramUsage">68%</span>
+                            </div>
+                            <div class="progress-bar-custom">
+                                <div class="progress-fill purple" id="ramBar" style="width: 68%"></div>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">
+                                <span>Stockage</span>
+                                <span class="metric-value" id="storageUsage">54%</span>
+                            </div>
+                            <div class="progress-bar-custom">
+                                <div class="progress-fill green" id="storageBar" style="width: 54%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="latency-display">
+                            <div class="latency-label">Latence Moyenne</div>
+                            <div class="latency-value">42<span>ms</span></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-{% endblock %}
+
+        
+        <div class="chart-card mt-4">
+            <div class="card-header-custom">
+                <h3>Simulations Récentes</h3>
+                <a href="{{ url_for('requests_list') }}" class="view-all-link">
+                    Voir tout <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Client</th>
+                            <th>Montant</th>
+                            <th>Score Risque</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sim in recent_sims %}
+                        <tr>
+                            <td>
+                                <div class="client-cell">
+                                    <div class="client-avatar">{{ sim.client_name[0] }}</div>
+                                    <div>
+                                        <div class="client-name">{{ sim.client_name }}</div>
+                                        <div class="client-id">{{ sim.cin }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><strong>{{ "{:,.0f}".format(sim.loan_amount) }} MAD</strong></td>
+                            <td>
+                                <div class="risk-badge {% if sim.risk_score > 50 %}high{% elif sim.risk_score > 30 %}medium{% else %}low{% endif %}">
+                                    {{ sim.risk_score }}%
+                                </div>
+                            </td>
+                            <td>
+                                {% if sim.status == 'Approved' %}
+                                    <span class="status-badge approved">
+                                        <i class="bi bi-check-circle-fill"></i> Approuvé
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge rejected">
+                                        <i class="bi bi-x-circle-fill"></i> Refusé
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted">{{ sim.date_added.strftime('%d/%m/%Y %H:%M') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endblock %}
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>

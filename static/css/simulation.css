@@ -1,115 +1,73 @@
+
+:root {
+    --glass-bg: rgba(15, 23, 42, 0.6);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+    --neon-blue: #38bdf8;
+    --neon-purple: #818cf8;
+}
+
 .fw-800 { font-weight: 800; }
 
+
 .ai-icon-circle {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
     border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.8rem;
-    box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.8rem;
+    box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
 }
+
 
 .form-control-custom, .form-select-custom {
-    width: 100%;
-    padding: 14px 18px;
+    width: 100%; padding: 14px 18px;
     background: rgba(15, 23, 42, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border: var(--glass-border) !important;
     border-radius: 12px;
-    color: white !important;
-    font-weight: 500;
+    color: white !important; font-weight: 500;
     transition: 0.3s;
 }
-
 .form-control-custom:focus, .form-select-custom:focus {
-    border-color: var(--accent-blue) !important;
-    outline: none;
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+    border-color: var(--neon-blue) !important;
+    outline: none; box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
 }
-
 .form-label-custom {
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    display: block;
-    color: #e2e8f0;
+    font-size: 0.85rem; font-weight: 600; color: #94a3b8;
+    margin-bottom: 8px; display: block;
 }
-
-.input-suffix {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
-    font-weight: 600;
-}
-
 .input-with-icon { position: relative; }
+.input-suffix {
+    position: absolute; right: 15px; top: 50%;
+    transform: translateY(-50%); color: #64748b; font-weight: 600; font-size: 0.9rem;
+}
+
 
 .btn-simulate {
-    width: 100%;
-    padding: 18px;
-    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-    border: none;
-    border-radius: 15px;
-    color: white;
-    font-weight: 700;
-    letter-spacing: 0.5px;
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+    border: none; border-radius: 12px;
+    color: white; font-weight: 700; letter-spacing: 0.5px;
     transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
 }
-
 .btn-simulate:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4);
 }
+.btn-simulate:disabled { opacity: 0.7; cursor: wait; }
 
-.stat-box {
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
 
-.stat-value { font-size: 2rem; font-weight: 800; line-height: 1; }
-.stat-label { font-size: 0.8rem; color: #94a3b8; margin-top: 5px; }
+.risk-card { border: 2px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
+.display-1 { font-size: 3.5rem; letter-spacing: -2px; }
 
-.risk-card { border: 2px solid rgba(255, 255, 255, 0.1); }
-.analysis-card { height: 100%; }
 
-.glass-modal {
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-up { animation: fadeIn 0.5s ease forwards; }
 
-.history-list { max-height: 400px; overflow-y: auto; }
-
-.history-item {
-    padding: 15px;
-    margin-bottom: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: all 0.3s ease;
-}
-
-.history-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateX(5px);
-}
 
 @media print {
     .no-print { display: none !important; }
-    .glass-card {
-        background: white !important;
-        color: black !important;
-        border: 1px solid #ddd !important;
-    }
+    body { background: white; color: black; }
+    .glass-card { border: 1px solid #ccc; box-shadow: none; }
+    .text-white { color: black !important; }
 }

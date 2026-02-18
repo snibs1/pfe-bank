@@ -1,45 +1,91 @@
 {% extends "dashboard.html" %}
+
 {% block content %}
-<div class="header-section mb-5">
-    <h2 class="text-white fw-800">Base de Données Clients</h2>
-    <p class="text-dim">Historique complet des simulations de crédit.</p>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/requests.css') }}">
+
+<div class="clients-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-12">
+            <h1 class="page-title">
+                <i class="bi bi-people me-3"></i>Base de Données Clients
+            </h1>
+            <p class="page-subtitle">Historique complet des simulations et décisions de crédit</p>
+        </div>
+    </div>
 </div>
 
-<div class="glass-card p-0 overflow-hidden">
+<div class="chart-card">
+    <div class="card-header-custom mb-4">
+        <h3>Liste des Clients</h3>
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" placeholder="Rechercher un client..." onkeyup="filterTable()">
+        </div>
+    </div>
+    
     <div class="table-responsive">
-        <table class="table table-dark table-hover mb-0" style="background: transparent;">
+        <table class="data-table" id="clientsTable">
             <thead>
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <th class="p-4 text-info">CLIENT</th>
-                    <th class="p-4 text-info">CIN</th>
-                    <th class="p-4 text-info">MONTANT</th>
-                    <th class="p-4 text-info">RISQUE</th>
-                    <th class="p-4 text-info">STATUT</th>
-                    <th class="p-4 text-info text-end">ACTION</th>
+                <tr>
+                    <th>Client</th>
+                    <th>CIN</th>
+                    <th>Téléphone</th>
+                    <th>Montant</th>
+                    <th>Score Risque</th>
+                    <th>Statut</th>
+                    <th>Date</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 {% for client in clients %}
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td class="p-4 fw-bold text-white">{{ client.client_name }}</td>
-                    <td class="p-4 text-dim">{{ client.cin }}</td>
-                    <td class="p-4">{{ client.loan_amount }} MAD</td>
-                    <td class="p-4">
-                        <span class="badge {% if client.risk_score > 50 %}bg-danger{% else %}bg-success{% endif %} bg-opacity-20">
-                            {{ client.risk_score }}%
-                        </span>
+                <tr>
+                    <td>
+                        <div class="client-cell">
+                            <div class="client-avatar">{{ client.client_name[0] }}</div>
+                            <div>
+                                <div class="client-name">{{ client.client_name }}</div>
+                                <div class="client-id">ID: #{{ client.id }}</div>
+                            </div>
+                        </div>
                     </td>
-                    <td class="p-4">
+                    <td class="text-secondary">{{ client.cin }}</td>
+                    <td class="text-secondary">{{ client.phone or 'N/A' }}</td>
+                    <td><strong>{{ "{:,.0f}".format(client.loan_amount) }} MAD</strong></td>
+                    <td>
+                        <div class="risk-badge {% if client.risk_score > 50 %}high{% elif client.risk_score > 30 %}medium{% else %}low{% endif %}">
+                            {{ client.risk_score }}%
+                        </div>
+                    </td>
+                    <td>
                         {% if client.status == 'Approved' %}
-                            <span class="text-success"><i class="fas fa-check-circle me-2"></i>Accordé</span>
+                            <span class="status-badge approved">
+                                <i class="bi bi-check-circle-fill"></i> Approuvé
+                            </span>
                         {% else %}
-                            <span class="text-danger"><i class="fas fa-times-circle me-2"></i>Refusé</span>
+                            <span class="status-badge rejected">
+                                <i class="bi bi-x-circle-fill"></i> Refusé
+                            </span>
                         {% endif %}
                     </td>
-                    <td class="p-4 text-end">
-                        <a href="{{ url_for('client_detail', id=client.id) }}" class="btn btn-sm btn-outline-info rounded-pill px-3">
-                            Voir <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
+                    <td class="text-muted">{{ client.date_added.strftime('%d/%m/%Y') }}</td>
+                    <td>
+                        <button class="btn-view" onclick='showClientModal({{ client.id }}, {
+                            "id": {{ client.id }},
+                            "client_name": "{{ client.client_name }}",
+                            "cin": "{{ client.cin }}",
+                            "phone": "{{ client.phone or "N/A" }}",
+                            "annual_income": {{ client.annual_income }},
+                            "credit_score": {{ client.credit_score }},
+                            "loan_amount": {{ client.loan_amount }},
+                            "loan_term": {{ client.loan_term }},
+                            "interest_rate": {{ client.interest_rate }},
+                            "risk_score": {{ client.risk_score }},
+                            "status": "{{ client.status }}",
+                            "date_added": "{{ client.date_added.isoformat() }}"
+                        })'>
+                            <i class="bi bi-eye"></i> Détails
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -47,4 +93,30 @@
         </table>
     </div>
 </div>
+
+<div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-file-earmark-person me-2"></i>
+                    Détails du Client
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" onclick="downloadPDF()">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Télécharger PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/requests.js') }}"></script>
+
 {% endblock %}

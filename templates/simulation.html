@@ -1,122 +1,104 @@
 {% extends "dashboard.html" %}
 
 {% block content %}
-<div class="header-section mb-5 animate__animated animate__fadeIn">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/simulation.css') }}">
+
+<div class="header-section mb-5 animate-up">
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h2 class="m-0 text-white fw-800"><i class="bi bi-robot me-2 text-info"></i>AI Risk Assessment Lab</h2>
-            <p class="text-dim mb-0">Système prédictif bancaire pour l'analyse du risque de crédit en temps réel</p>
+            <p class="text-dim mb-0">Analyse de risque crédit en temps réel (Moteur XGBoost)</p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-outline-info btn-sm" onclick="loadPreviousAnalysis()">
                 <i class="bi bi-clock-history me-1"></i> Historique
             </button>
             <div class="badge bg-info bg-opacity-10 border border-info border-opacity-25 px-3 py-2 text-info">
-                <i class="bi bi-cpu-fill me-1"></i> Model: XGBoost v2.4
+                <i class="bi bi-cpu-fill me-1"></i> v2.4 Ready
             </div>
         </div>
     </div>
 </div>
 
-
-<div class="row g-4 animate__animated animate__fadeInUp">
+<div class="row g-4 animate-up" style="animation-delay: 0.1s;">
     <div class="col-lg-8">
         <div class="glass-card p-4 mb-4">
             <div class="d-flex align-items-center mb-4">
-                <div class="ai-icon-circle me-3">
-                    <i class="bi bi-person-vcard"></i>
-                </div>
+                <div class="ai-icon-circle me-3"><i class="bi bi-person-vcard"></i></div>
                 <div>
-                    <h4 class="m-0 text-white">Informations Client</h4>
-                    <small class="text-dim">Identifiant unique: <span id="clientId" class="text-info">CL-{{ "%06d"|format(range(100000, 999999)|random) }}</span></small>
+                    <h4 class="m-0 text-white">Nouveau Dossier</h4>
+                    <small class="text-dim">ID Session: <span id="clientId" class="text-info">...</span></small>
                 </div>
             </div>
 
             <form id="simulationForm" autocomplete="off">
-                <input type="hidden" name="client_id" id="clientIdField" value="">
+                <input type="hidden" name="client_id" id="clientIdField">
                 
                 <div class="row g-4">
-                    
-                    <div class="col-12 mb-3">
-                        <h6 class="text-info mb-3"><i class="bi bi-person-badge me-2"></i>Informations Personnelles</h6>
+                    <div class="col-12">
+                        <h6 class="text-info mb-3 small fw-bold text-uppercase"><i class="bi bi-person me-2"></i>Civil</h6>
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label-custom">Nom Complet</label>
-                                <input type="text" name="client_name" class="form-control-custom" placeholder="Ex: Ahmed Benani" required>
+                                <input type="text" name="client_name" class="form-control-custom" placeholder="ex: Ahmed Benani" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label-custom">CIN</label>
-                                <input type="text" name="cin" class="form-control-custom" placeholder="Ex: AB123456" required>
+                                <input type="text" name="cin" class="form-control-custom" placeholder="AB123456" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label-custom">Téléphone</label>
-                                <input type="tel" name="phone" class="form-control-custom" placeholder="Ex: +212 6XX XX XX XX" required>
+                                <input type="tel" name="phone" class="form-control-custom" placeholder="06..." required>
                             </div>
                         </div>
                     </div>
 
-                    
-                    <div class="col-12 mb-3">
-                        <h6 class="text-info mb-3"><i class="bi bi-cash-stack me-2"></i>Informations Financières</h6>
+                    <div class="col-12">
+                        <h6 class="text-info mb-3 small fw-bold text-uppercase"><i class="bi bi-wallet2 me-2"></i>Finance</h6>
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <div class="input-group-custom">
-                                    <label class="form-label-custom">Revenu Annuel (DH)</label>
-                                    <div class="input-with-icon">
-                                        <input type="number" name="annual_income" class="form-control-custom" placeholder="Ex: 500000" min="0" required>
-                                        <span class="input-suffix">MAD</span>
-                                    </div>
+                                <label class="form-label-custom">Revenu Annuel</label>
+                                <div class="input-with-icon">
+                                    <input type="number" name="annual_income" class="form-control-custom" placeholder="500000" required>
+                                    <span class="input-suffix">DH</span>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="input-group-custom">
-                                    <label class="form-label-custom">Score de Crédit</label>
-                                    <input type="number" name="credit_score" class="form-control-custom" placeholder="300-850" min="300" max="850" required>
-                                    <div class="progress mt-2" style="height: 4px;">
-                                        <div class="progress-bar" id="scoreBar" style="width: 65%"></div>
-                                    </div>
+                                <label class="form-label-custom">Score Crédit (300-850)</label>
+                                <input type="number" name="credit_score" class="form-control-custom" placeholder="720" min="300" max="850" required>
+                                <div class="progress mt-2" style="height: 3px; background: rgba(255,255,255,0.1);">
+                                    <div class="progress-bar bg-info" id="scoreBar" style="width: 0%"></div>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="input-group-custom">
-                                    <label class="form-label-custom">Ratio DTI (%)</label>
-                                    <input type="number" step="0.1" name="debt_to_income_ratio" class="form-control-custom" placeholder="Ex: 25.5" min="0" max="100" required>
-                                </div>
+                                <label class="form-label-custom">DTI (%)</label>
+                                <input type="number" step="0.1" name="debt_to_income_ratio" class="form-control-custom" placeholder="30" required>
                             </div>
                         </div>
                     </div>
 
-                    
-                    <div class="col-12 mb-3">
-                        <h6 class="text-info mb-3"><i class="bi bi-bank me-2"></i>Détails du Prêt</h6>
+                    <div class="col-12">
+                        <h6 class="text-info mb-3 small fw-bold text-uppercase"><i class="bi bi-bank me-2"></i>Projet</h6>
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <div class="input-group-custom">
-                                    <label class="form-label-custom">Montant du Prêt (DH)</label>
-                                    <div class="input-with-icon">
-                                        <input type="number" name="loan_amount" class="form-control-custom" placeholder="Ex: 200000" min="0" required>
-                                        <span class="input-suffix">MAD</span>
-                                    </div>
+                                <label class="form-label-custom">Montant Demandé</label>
+                                <div class="input-with-icon">
+                                    <input type="number" name="loan_amount" class="form-control-custom" placeholder="200000" required>
+                                    <span class="input-suffix">DH</span>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="input-group-custom">
-                                    <label class="form-label-custom">Durée (Mois)</label>
-                                    <input type="number" name="loan_term" class="form-control-custom" placeholder="Ex: 60" min="1" max="360" required>
-                                </div>
+                                <label class="form-label-custom">Durée (Mois)</label>
+                                <input type="number" name="loan_term" class="form-control-custom" placeholder="60" required>
                             </div>
                             <div class="col-md-4">
-                                <div class="input-group-custom">
-                                    <label class="form-label-custom">Taux d'Intérêt (%)</label>
-                                    <input type="number" step="0.01" name="interest_rate" class="form-control-custom" placeholder="Ex: 5.75" min="0" max="20" required>
-                                </div>
+                                <label class="form-label-custom">Taux (%)</label>
+                                <input type="number" step="0.01" name="interest_rate" class="form-control-custom" placeholder="Auto" required>
                             </div>
                         </div>
                     </div>
 
-                    
-                    <div class="col-12 mb-3">
-                        <h6 class="text-info mb-3"><i class="bi bi-people me-2"></i>Informations Démographiques</h6>
+                    <div class="col-12">
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label-custom">Genre</label>
@@ -126,73 +108,41 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label-custom">Âge</label>
-                                <input type="number" name="age" class="form-control-custom" placeholder="Ex: 35" min="18" max="80" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label-custom">Statut Matrimonial</label>
+                                <label class="form-label-custom">Situation</label>
                                 <select name="marital_status" class="form-select-custom">
                                     <option value="Single">Célibataire</option>
                                     <option value="Married">Marié(e)</option>
                                     <option value="Divorced">Divorcé(e)</option>
-                                    <option value="Widowed">Veuf/Veuve</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label-custom">Statut Professionnel</label>
-                                <select name="employment_status" class="form-select-custom">
-                                    <option value="Employed">Employé(e)</option>
-                                    <option value="Self-Employed">Indépendant(e)</option>
-                                    <option value="Unemployed">Sans emploi</option>
-                                    <option value="Retired">Retraité(e)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    
-                    <div class="col-12">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label-custom">Niveau d'Éducation</label>
-                                <select name="education_level" class="form-select-custom">
-                                    <option value="Graduate">Diplômé Universitaire</option>
-                                    <option value="College">Collège/Institut</option>
-                                    <option value="High School">Lycée</option>
-                                    <option value="Other">Autre</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label-custom">Objectif du Prêt</label>
-                                <select name="loan_purpose" class="form-select-custom">
-                                    <option value="Personal">Personnel</option>
-                                    <option value="Business">Entreprise</option>
-                                    <option value="Education">Éducation</option>
+                                <label class="form-label-custom">Type Prêt</label>
+                                <select name="loan_purpose" class="form-select-custom" onchange="autoFillInterestRate()">
+                                    <option value="Personal">Personnel (Conso)</option>
+                                    <option value="Business">Professionnel</option>
                                     <option value="Home">Immobilier</option>
-                                    <option value="Car">Voiture</option>
+                                    <option value="Car">Auto</option>
+                                    <option value="Education">Études</option>
                                 </select>
                             </div>
+                            <input type="hidden" name="age" value="35">
+                            <input type="hidden" name="employment_status" value="Employed">
+                            <input type="hidden" name="education_level" value="Graduate">
                         </div>
                     </div>
 
-                    
                     <div class="col-12 mt-4">
                         <div class="d-grid gap-3">
                             <button type="submit" class="btn-simulate shadow-lg">
-                                <i class="bi bi-cpu-fill me-2"></i>
-                                <span class="btn-text">ANALYSER LE RISQUE IA</span>
-                                <span class="btn-loader d-none">
-                                    <span class="spinner-border spinner-border-sm me-2"></span>
-                                    Analyse en cours...
-                                </span>
+                                <span class="btn-text"><i class="bi bi-cpu-fill me-2"></i>LANCER L'ANALYSE IA</span>
+                                <span class="btn-loader d-none"><span class="spinner-border spinner-border-sm me-2"></span>Traitement...</span>
                             </button>
-                            
                             <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-outline-info flex-fill" onclick="fillSampleData()">
+                                <button type="button" class="btn btn-outline-info flex-fill fw-bold" onclick="fillSampleData()">
                                     <i class="bi bi-magic me-2"></i>Données de Test
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary flex-fill" onclick="resetForm()">
-                                    <i class="bi bi-arrow-clockwise me-2"></i>Réinitialiser
+                                <button type="button" class="btn btn-outline-secondary flex-fill fw-bold" onclick="resetForm()">
+                                    <i class="bi bi-arrow-counterclockwise me-2"></i>Vider
                                 </button>
                             </div>
                         </div>
@@ -202,846 +152,48 @@
         </div>
     </div>
 
-    
     <div class="col-lg-4">
-        
         <div class="glass-card p-4 mb-4">
-            <h5 class="text-white mb-4"><i class="bi bi-speedometer2 me-2"></i>Performance du Modèle</h5>
-            
-            <div class="mb-4">
-                <div class="d-flex justify-content-between mb-2">
-                    <small class="text-dim">Précision Globale</small>
-                    <small class="fw-bold text-info">91.2%</small>
-                </div>
-                <div class="progress" style="height: 6px;">
-                    <div class="progress-bar bg-info" style="width: 91.2%"></div>
-                </div>
-            </div>
-            
-            <div class="mb-4">
-                <div class="d-flex justify-content-between mb-2">
-                    <small class="text-dim">Latence d'Inférence</small>
-                    <small class="fw-bold text-info">42ms</small>
-                </div>
-                <div class="progress" style="height: 6px;">
-                    <div class="progress-bar bg-success" style="width: 20%"></div>
-                </div>
-            </div>
-            
-            <div class="alert alert-success bg-success bg-opacity-5 border-success border-opacity-10 mb-0">
-                <i class="bi bi-shield-check me-2"></i>
-                <small>Système opérationnel - Prêt pour analyse</small>
-            </div>
-        </div>
-
-        
-        <div class="glass-card p-4">
-            <h5 class="text-white mb-4"><i class="bi bi-bar-chart-line me-2"></i>Statistiques du Jour</h5>
-            
-            <div class="row text-center">
-                <div class="col-6 mb-3">
-                    <div class="stat-box">
-                        <div class="stat-value text-info" id="todayAnalyses">0</div>
-                        <div class="stat-label">Analyses</div>
-                    </div>
-                </div>
-                <div class="col-6 mb-3">
-                    <div class="stat-box">
-                        <div class="stat-value text-success" id="todayApproved">0</div>
-                        <div class="stat-label">Approuvés</div>
+            <h5 class="text-white mb-4"><i class="bi bi-activity me-2"></i>Statistiques Live</h5>
+            <div class="row text-center g-2">
+                <div class="col-6">
+                    <div class="stat-box p-3 rounded" style="background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                        <div class="text-info fw-bold fs-4" id="todayAnalyses">0</div>
+                        <div class="text-dim small">Analyses</div>
                     </div>
                 </div>
                 <div class="col-6">
-                    <div class="stat-box">
-                        <div class="stat-value text-danger" id="todayRejected">0</div>
-                        <div class="stat-label">Refusés</div>
+                    <div class="stat-box p-3 rounded" style="background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                        <div class="text-success fw-bold fs-4" id="todayApproved">0</div>
+                        <div class="text-dim small">Approuvés</div>
                     </div>
                 </div>
-                <div class="col-6">
-                    <div class="stat-box">
-                        <div class="stat-value text-warning" id="todayAvgRisk">0%</div>
-                        <div class="stat-label">Risque Moyen</div>
-                    </div>
+            </div>
+        </div>
+
+        <div id="resultSection" class="d-none animate-up">
+            <div class="glass-card p-4 border border-info border-opacity-25 shadow-lg text-center position-relative overflow-hidden">
+                <div style="position: absolute; top:-50%; left:-50%; width:200%; height:200%; background: radial-gradient(circle, rgba(56,189,248,0.1) 0%, rgba(0,0,0,0) 70%); pointer-events: none;"></div>
+                
+                <div id="resultIcon" class="mb-3" style="font-size: 4rem;"></div>
+                <h2 id="resultTitle" class="fw-800 mb-1"></h2>
+                <p id="resultSubtitle" class="text-dim small mb-4"></p>
+
+                <div class="risk-card p-4 rounded-4 mb-4">
+                    <h6 class="text-dim text-uppercase small mb-2">Probabilité de Défaut</h6>
+                    <div class="display-1 fw-bold text-white mb-0" id="riskScoreDisplay">0%</div>
+                    <span class="badge mt-2" id="riskCategory">Calcul...</span>
+                </div>
+
+                <div id="aiReason" class="alert bg-black bg-opacity-20 border-0 text-start text-dim small mb-4"></div>
+
+                <div class="d-flex justify-content-center gap-2 no-print">
+                    <button class="btn btn-sm btn-outline-light" onclick="window.print()"><i class="bi bi-printer me-2"></i>Imprimer</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-
-<div id="resultSection" class="d-none">
-    <div class="glass-card p-5 mt-4 border border-info border-opacity-20 shadow-lg">
-        
-        <div class="text-center mb-5">
-            <div id="resultIcon" class="mb-3"></div>
-            <h2 id="resultTitle" class="fw-800"></h2>
-            <p class="text-dim" id="resultSubtitle">Rapport d'analyse généré le <span id="reportDate"></span></p>
-            
-            <div class="d-flex justify-content-center gap-3 mt-4">
-                <button class="btn btn-outline-info" onclick="exportToPDF()">
-                    <i class="bi bi-file-earmark-pdf me-2"></i>Exporter PDF
-                </button>
-                <button class="btn btn-outline-success" onclick="saveAnalysis()">
-                    <i class="bi bi-save me-2"></i>Sauvegarder
-                </button>
-                <button class="btn btn-outline-secondary" onclick="printReport()">
-                    <i class="bi bi-printer me-2"></i>Imprimer
-                </button>
-            </div>
-        </div>
-
-        
-        <div class="row g-5 mb-5">
-            <div class="col-md-4">
-                <div class="risk-card text-center p-4 rounded-4 bg-black bg-opacity-20">
-                    <h5 class="text-dim mb-3">Score de Risque</h5>
-                    <div class="display-1 fw-bold" id="riskScoreDisplay">0%</div>
-                    <div class="risk-category mt-3">
-                        <span class="badge" id="riskCategory">N/A</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-8">
-                <div class="p-4 rounded-4 bg-black bg-opacity-20 h-100">
-                    <h5 class="text-info mb-4"><i class="bi bi-exclamation-triangle me-2"></i>Facteurs de Risque Clés</h5>
-                    <div id="riskFactors" class="row">
-                        
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        
-        <div class="row g-4">
-            <div class="col-md-6">
-                <div class="analysis-card p-4 rounded-4 bg-black bg-opacity-20">
-                    <h5 class="text-info mb-4"><i class="bi bi-graph-up me-2"></i>Analyse Financière</h5>
-                    <table class="table table-borderless table-dark">
-                        <tbody>
-                            <tr>
-                                <td>Ratio Prêt/Revenu</td>
-                                <td class="text-end" id="loanIncomeRatio">0%</td>
-                            </tr>
-                            <tr>
-                                <td>Ratio Dette/Revenu (DTI)</td>
-                                <td class="text-end" id="dtiRatio">0%</td>
-                            </tr>
-                            <tr>
-                                <td>Mensualité Estimée</td>
-                                <td class="text-end" id="monthlyPayment">0 MAD</td>
-                            </tr>
-                            <tr>
-                                <td>Capacité de Remboursement</td>
-                                <td class="text-end" id="repaymentCapacity">0 MAD</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="analysis-card p-4 rounded-4 bg-black bg-opacity-20">
-                    <h5 class="text-info mb-4"><i class="bi bi-lightbulb me-2"></i>Recommandation IA</h5>
-                    <p id="aiRecommendation" class="mb-4">
-                        En attente d'analyse...
-                    </p>
-                    <div class="alert" id="recommendationAlert">
-                        
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        
-        <div class="mt-5 pt-4 border-top border-white border-opacity-10">
-            <h5 class="text-info mb-4"><i class="bi bi-person-lines-fill me-2"></i>Résumé Client</h5>
-            <div class="row">
-                <div class="col-md-3">
-                    <small class="text-dim d-block">Nom Client</small>
-                    <strong id="clientNameDisplay">-</strong>
-                </div>
-                <div class="col-md-3">
-                    <small class="text-dim d-block">CIN</small>
-                    <strong id="clientCinDisplay">-</strong>
-                </div>
-                <div class="col-md-3">
-                    <small class="text-dim d-block">Score Crédit</small>
-                    <strong id="clientScoreDisplay">-</strong>
-                </div>
-                <div class="col-md-3">
-                    <small class="text-dim d-block">Revenu Mensuel</small>
-                    <strong id="clientIncomeDisplay">-</strong>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content glass-modal">
-            <div class="modal-header border-bottom border-white border-opacity-10">
-                <h5 class="modal-title text-white"><i class="bi bi-clock-history me-2"></i>Historique des Analyses</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="historyList" class="history-list">
-                    
-                </div>
-            </div>
-            <div class="modal-footer border-top border-white border-opacity-10">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fermer</button>
-                <button type="button" class="btn btn-outline-danger" onclick="clearHistory()">
-                    <i class="bi bi-trash me-2"></i>Effacer l'Historique
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-    .fw-800 { font-weight: 800; }
-    
-    .ai-icon-circle {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.8rem;
-        box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
-    }
-    
-    .form-control-custom, .form-select-custom {
-        width: 100%;
-        padding: 14px 18px;
-        background: rgba(15, 23, 42, 0.8) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 12px;
-        color: white !important;
-        font-weight: 500;
-        transition: 0.3s;
-    }
-    
-    .form-control-custom:focus, .form-select-custom:focus {
-        border-color: var(--accent-blue) !important;
-        outline: none;
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
-    }
-    
-    .form-label-custom {
-        font-size: 0.8rem;
-        font-weight: 600;
-        margin-bottom: 8px;
-        display: block;
-        color: #e2e8f0;
-    }
-    
-    .input-suffix {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
-        font-weight: 600;
-    }
-    
-    .input-with-icon {
-        position: relative;
-    }
-    
-    .btn-simulate {
-        width: 100%;
-        padding: 18px;
-        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-        border: none;
-        border-radius: 15px;
-        color: white;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-    
-    .btn-simulate:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
-    }
-    
-    .stat-box {
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 800;
-        line-height: 1;
-    }
-    
-    .stat-label {
-        font-size: 0.8rem;
-        color: #94a3b8;
-        margin-top: 5px;
-    }
-    
-    .risk-card {
-        border: 2px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .analysis-card {
-        height: 100%;
-    }
-    
-    .glass-modal {
-        background: rgba(15, 23, 42, 0.95);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .history-list {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    
-    .history-item {
-        padding: 15px;
-        margin-bottom: 10px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        transition: all 0.3s ease;
-    }
-    
-    .history-item:hover {
-        background: rgba(255, 255, 255, 0.1);
-        transform: translateX(5px);
-    }
-    
-    @media print {
-        .no-print {
-            display: none !important;
-        }
-        
-        .glass-card {
-            background: white !important;
-            color: black !important;
-            border: 1px solid #ddd !important;
-        }
-    }
-</style>
-
-<script>
-
-document.addEventListener('DOMContentLoaded', function() {
-    
-    const clientId = 'CL-' + Math.floor(100000 + Math.random() * 900000);
-    document.getElementById('clientId').textContent = clientId;
-    document.getElementById('clientIdField').value = clientId;
-    
-    
-    loadTodayStats();
-    
-    
-    initializeFormValidation();
-    
-    
-    loadHistory();
-});
-
-
-document.getElementById('simulationForm').onsubmit = async function(e) {
-    e.preventDefault();
-    
-    const btn = this.querySelector('.btn-simulate');
-    const btnText = btn.querySelector('.btn-text');
-    const btnLoader = btn.querySelector('.btn-loader');
-    
-    
-    btnText.classList.add('d-none');
-    btnLoader.classList.remove('d-none');
-    btn.disabled = true;
-    
-    try {
-        const formData = new FormData(this);
-        
-        
-        formData.append('timestamp', new Date().toISOString());
-        
-        const response = await fetch('/predict', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const result = await response.json();
-        
-        if (result.error) {
-            throw new Error(result.error);
-        }
-        
-        
-        displayResults(result, formData);
-        
-        
-        saveToHistory(result, formData);
-        
-        
-        updateTodayStats(result.status);
-        
-    } catch (error) {
-        showAlert('Erreur lors de l\'analyse: ' + error.message, 'danger');
-    } finally {
-        
-        btnText.classList.remove('d-none');
-        btnLoader.classList.add('d-none');
-        btn.disabled = false;
-    }
-};
-
-
-function displayResults(result, formData) {
-    const resultSection = document.getElementById('resultSection');
-    const riskScore = parseFloat(result.risk_score);
-    
-    
-    document.getElementById('reportDate').textContent = new Date().toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    
-    
-    const resultIcon = document.getElementById('resultIcon');
-    const resultTitle = document.getElementById('resultTitle');
-    const resultSubtitle = document.getElementById('resultSubtitle');
-    
-    if (result.status === 'Approved' || riskScore <= 30) {
-        resultIcon.innerHTML = '<i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>';
-        resultTitle.innerHTML = '<span class="text-success">PRÊT APPROUVÉ</span>';
-        resultTitle.className = 'fw-800 text-success';
-        resultSubtitle.textContent = 'Le client présente un profil de risque acceptable';
-    } else if (riskScore <= 50) {
-        resultIcon.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 5rem;"></i>';
-        resultTitle.innerHTML = '<span class="text-warning">ANALYSE SUPPLÉMENTAIRE REQUISE</span>';
-        resultTitle.className = 'fw-800 text-warning';
-        resultSubtitle.textContent = 'Profil de risque modéré - Révision manuelle nécessaire';
-    } else {
-        resultIcon.innerHTML = '<i class="bi bi-x-circle-fill text-danger" style="font-size: 5rem;"></i>';
-        resultTitle.innerHTML = '<span class="text-danger">PRÊT REFUSÉ</span>';
-        resultTitle.className = 'fw-800 text-danger';
-        resultSubtitle.textContent = 'Risque de défaut trop élevé';
-    }
-    
-    
-    const riskScoreDisplay = document.getElementById('riskScoreDisplay');
-    riskScoreDisplay.textContent = riskScore.toFixed(1) + '%';
-    riskScoreDisplay.style.color = getRiskColor(riskScore);
-    
-    
-    const riskCategory = document.getElementById('riskCategory');
-    const category = getRiskCategory(riskScore);
-    riskCategory.textContent = category.label;
-    riskCategory.className = 'badge ' + category.class;
-    
-    
-    updateRiskFactors(result, formData);
-    
-    
-    updateFinancialAnalysis(formData);
-    
-    
-    updateAIRecommendation(riskScore, formData);
-    
-    
-    updateClientSummary(formData);
-    
-    
-    resultSection.classList.remove('d-none');
-    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-
-function saveToHistory(result, formData) {
-    const history = JSON.parse(localStorage.getItem('nbBankAnalysisHistory') || '[]');
-    
-    const analysis = {
-        id: Date.now(),
-        clientId: formData.get('client_id'),
-        clientName: formData.get('client_name'),
-        cin: formData.get('cin'),
-        riskScore: parseFloat(result.risk_score),
-        status: result.status,
-        reason: result.reason,
-        timestamp: new Date().toISOString(),
-        data: Object.fromEntries(formData)
-    };
-    
-    history.unshift(analysis); 
-    history.splice(50); 
-    
-    localStorage.setItem('nbBankAnalysisHistory', JSON.stringify(history));
-}
-
-
-function loadHistory() {
-    const history = JSON.parse(localStorage.getItem('nbBankAnalysisHistory') || '[]');
-    const historyList = document.getElementById('historyList');
-    
-    if (history.length === 0) {
-        historyList.innerHTML = '<div class="text-center text-dim py-4">Aucune analyse enregistrée</div>';
-        return;
-    }
-    
-    let html = '';
-    history.forEach(item => {
-        const date = new Date(item.timestamp).toLocaleDateString('fr-FR', {
-            day: 'numeric',
-            month: 'short',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        
-        html += `
-            <div class="history-item" onclick="loadAnalysis(${item.id})" style="cursor: pointer;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong class="text-white">${item.clientName}</strong>
-                        <div class="text-dim small">${item.cin} • ${date}</div>
-                    </div>
-                    <div class="text-end">
-                        <div class="badge ${getRiskCategory(item.riskScore).class}">${item.riskScore.toFixed(1)}%</div>
-                        <div class="small mt-1 ${item.status === 'Approved' ? 'text-success' : 'text-danger'}">
-                            ${item.status === 'Approved' ? 'Approuvé' : 'Refusé'}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    
-    historyList.innerHTML = html;
-}
-
-
-function loadAnalysis(id) {
-    const history = JSON.parse(localStorage.getItem('nbBankAnalysisHistory') || '[]');
-    const analysis = history.find(item => item.id === id);
-    
-    if (analysis) {
-        
-        Object.entries(analysis.data).forEach(([key, value]) => {
-            const input = document.querySelector(`[name="${key}"]`);
-            if (input) {
-                if (input.type === 'radio' || input.type === 'checkbox') {
-                    input.checked = input.value === value;
-                } else {
-                    input.value = value;
-                }
-            }
-        });
-        
-        
-        const modal = bootstrap.Modal.getInstance(document.getElementById('historyModal'));
-        modal.hide();
-        
-        
-        displayResults(analysis, new FormData(document.getElementById('simulationForm')));
-        
-        showAlert('Analyse chargée avec succès', 'success');
-    }
-}
-
-
-function clearHistory() {
-    if (confirm('Voulez-vous vraiment effacer tout l\'historique ?')) {
-        localStorage.removeItem('nbBankAnalysisHistory');
-        loadHistory();
-        showAlert('Historique effacé', 'success');
-    }
-}
-
-
-function exportToPDF() {
-    
-    printReport();
-}
-
-
-function printReport() {
-    window.print();
-}
-
-
-function saveAnalysis() {
-    
-    showAlert('Analyse sauvegardée dans la base de données', 'success');
-}
-
-
-function loadTodayStats() {
-    const today = new Date().toDateString();
-    const history = JSON.parse(localStorage.getItem('nbBankAnalysisHistory') || '[]');
-    
-    const todayAnalyses = history.filter(item => 
-        new Date(item.timestamp).toDateString() === today
-    );
-    
-    const approved = todayAnalyses.filter(item => item.status === 'Approved').length;
-    const rejected = todayAnalyses.filter(item => item.status === 'Rejected').length;
-    const avgRisk = todayAnalyses.length > 0 ? 
-        (todayAnalyses.reduce((sum, item) => sum + item.riskScore, 0) / todayAnalyses.length).toFixed(1) : 0;
-    
-    document.getElementById('todayAnalyses').textContent = todayAnalyses.length;
-    document.getElementById('todayApproved').textContent = approved;
-    document.getElementById('todayRejected').textContent = rejected;
-    document.getElementById('todayAvgRisk').textContent = avgRisk + '%';
-}
-
-
-function updateTodayStats(status) {
-    const analyses = parseInt(document.getElementById('todayAnalyses').textContent) + 1;
-    document.getElementById('todayAnalyses').textContent = analyses;
-    
-    if (status === 'Approved') {
-        const approved = parseInt(document.getElementById('todayApproved').textContent) + 1;
-        document.getElementById('todayApproved').textContent = approved;
-    } else {
-        const rejected = parseInt(document.getElementById('todayRejected').textContent) + 1;
-        document.getElementById('todayRejected').textContent = rejected;
-    }
-    
-    
-    const history = JSON.parse(localStorage.getItem('nbBankAnalysisHistory') || '[]');
-    const today = new Date().toDateString();
-    const todayAnalyses = history.filter(item => 
-        new Date(item.timestamp).toDateString() === today
-    );
-    
-    if (todayAnalyses.length > 0) {
-        const avgRisk = (todayAnalyses.reduce((sum, item) => sum + item.riskScore, 0) / todayAnalyses.length).toFixed(1);
-        document.getElementById('todayAvgRisk').textContent = avgRisk + '%';
-    }
-}
-
-
-function getRiskColor(score) {
-    if (score <= 30) return '#10b981'; 
-    if (score <= 50) return '#f59e0b'; 
-    return '#ef4444'; 
-}
-
-function getRiskCategory(score) {
-    if (score <= 20) return { label: 'Très Faible', class: 'bg-success' };
-    if (score <= 40) return { label: 'Faible', class: 'bg-success bg-opacity-75' };
-    if (score <= 60) return { label: 'Modéré', class: 'bg-warning' };
-    if (score <= 80) return { label: 'Élevé', class: 'bg-danger bg-opacity-75' };
-    return { label: 'Très Élevé', class: 'bg-danger' };
-}
-
-function updateRiskFactors(result, formData) {
-    const factorsContainer = document.getElementById('riskFactors');
-    const annualIncome = parseFloat(formData.get('annual_income') || 0);
-    const loanAmount = parseFloat(formData.get('loan_amount') || 0);
-    const dti = parseFloat(formData.get('debt_to_income_ratio') || 0);
-    const creditScore = parseFloat(formData.get('credit_score') || 0);
-    
-    const factors = [
-        {
-            name: 'Ratio Dette/Revenu',
-            value: dti + '%',
-            risk: dti > 40 ? 'Élevé' : dti > 30 ? 'Modéré' : 'Faible',
-            impact: 'Fort'
-        },
-        {
-            name: 'Score de Crédit',
-            value: creditScore,
-            risk: creditScore < 580 ? 'Élevé' : creditScore < 670 ? 'Modéré' : 'Faible',
-            impact: 'Fort'
-        },
-        {
-            name: 'Ratio Prêt/Revenu',
-            value: (loanAmount / annualIncome * 100).toFixed(1) + '%',
-            risk: (loanAmount / annualIncome) > 3 ? 'Élevé' : (loanAmount / annualIncome) > 2 ? 'Modéré' : 'Faible',
-            impact: 'Modéré'
-        }
-    ];
-    
-    let html = '';
-    factors.forEach(factor => {
-        html += `
-            <div class="col-md-4 mb-3">
-                <div class="p-3 rounded bg-black bg-opacity-20">
-                    <small class="text-dim d-block">${factor.name}</small>
-                    <strong class="text-white">${factor.value}</strong>
-                    <div class="d-flex justify-content-between mt-2">
-                        <small class="text-dim">Impact: ${factor.impact}</small>
-                        <small class="${factor.risk === 'Élevé' ? 'text-danger' : factor.risk === 'Modéré' ? 'text-warning' : 'text-success'}">
-                            ${factor.risk}
-                        </small>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    
-    factorsContainer.innerHTML = html;
-}
-
-function updateFinancialAnalysis(formData) {
-    const annualIncome = parseFloat(formData.get('annual_income') || 0);
-    const loanAmount = parseFloat(formData.get('loan_amount') || 0);
-    const interestRate = parseFloat(formData.get('interest_rate') || 0);
-    const loanTerm = parseFloat(formData.get('loan_term') || 12);
-    const dti = parseFloat(formData.get('debt_to_income_ratio') || 0);
-    
-    
-    const monthlyRate = interestRate / 100 / 12;
-    const monthlyPayment = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanTerm) / (Math.pow(1 + monthlyRate, loanTerm) - 1);
-    
-    
-    const loanIncomeRatio = (loanAmount / annualIncome * 100).toFixed(1);
-    
-    
-    const monthlyIncome = annualIncome / 12;
-    const repaymentCapacity = monthlyIncome * 0.4; 
-    
-    document.getElementById('loanIncomeRatio').textContent = loanIncomeRatio + '%';
-    document.getElementById('dtiRatio').textContent = dti.toFixed(1) + '%';
-    document.getElementById('monthlyPayment').textContent = monthlyPayment.toFixed(0) + ' MAD';
-    document.getElementById('repaymentCapacity').textContent = repaymentCapacity.toFixed(0) + ' MAD';
-}
-
-function updateAIRecommendation(riskScore, formData) {
-    const recommendationText = document.getElementById('aiRecommendation');
-    const recommendationAlert = document.getElementById('recommendationAlert');
-    
-    if (riskScore <= 30) {
-        recommendationText.textContent = 'Le profil du client présente un risque faible. Le modèle IA recommande l\'approbation du prêt avec les conditions standards. Le client démontre une stabilité financière adéquate et une bonne historique de crédit.';
-        recommendationAlert.className = 'alert alert-success bg-success bg-opacity-10 border-success border-opacity-25';
-        recommendationAlert.innerHTML = '<i class="bi bi-check-circle me-2"></i>Recommandation: <strong>Approuver le prêt</strong>';
-    } else if (riskScore <= 50) {
-        recommendationText.textContent = 'Risque modéré détecté. Recommandation: Révision manuelle par un conseiller crédit. Considérer des garanties supplémentaires ou une réduction du montant. Surveillance accrue recommandée.';
-        recommendationAlert.className = 'alert alert-warning bg-warning bg-opacity-10 border-warning border-opacity-25';
-        recommendationAlert.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Recommandation: <strong>Analyse supplémentaire requise</strong>';
-    } else {
-        recommendationText.textContent = 'Risque élevé identifié. Le modèle IA recommande le refus du prêt basé sur le profil de risque. Facteurs déterminants: ratio dette/revenu élevé, score de crédit insuffisant, et capacité de remboursement limitée.';
-        recommendationAlert.className = 'alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-25';
-        recommendationAlert.innerHTML = '<i class="bi bi-x-circle me-2"></i>Recommandation: <strong>Refuser le prêt</strong>';
-    }
-}
-
-function updateClientSummary(formData) {
-    document.getElementById('clientNameDisplay').textContent = formData.get('client_name') || '-';
-    document.getElementById('clientCinDisplay').textContent = formData.get('cin') || '-';
-    document.getElementById('clientScoreDisplay').textContent = formData.get('credit_score') || '-';
-    
-    const annualIncome = parseFloat(formData.get('annual_income') || 0);
-    document.getElementById('clientIncomeDisplay').textContent = (annualIncome / 12).toFixed(0) + ' MAD/mois';
-}
-
-function fillSampleData() {
-    const sampleData = {
-        client_name: 'Ahmed Benani',
-        cin: 'AB123456',
-        phone: '+212 612 345 678',
-        annual_income: 500000,
-        credit_score: 720,
-        debt_to_income_ratio: 28.5,
-        loan_amount: 200000,
-        loan_term: 60,
-        interest_rate: 5.75,
-        gender: 'Male',
-        age: 35,
-        marital_status: 'Married',
-        employment_status: 'Employed',
-        education_level: 'Graduate',
-        loan_purpose: 'Personal'
-    };
-    
-    Object.entries(sampleData).forEach(([key, value]) => {
-        const input = document.querySelector(`[name="${key}"]`);
-        if (input) {
-            if (input.type === 'radio' || input.type === 'checkbox') {
-                input.checked = input.value === value;
-            } else {
-                input.value = value;
-            }
-        }
-    });
-    
-    showAlert('Données de test chargées avec succès', 'info');
-}
-
-function resetForm() {
-    if (confirm('Voulez-vous vraiment réinitialiser le formulaire ?')) {
-        document.getElementById('simulationForm').reset();
-        document.getElementById('resultSection').classList.add('d-none');
-        showAlert('Formulaire réinitialisé', 'info');
-    }
-}
-
-function loadPreviousAnalysis() {
-    const modal = new bootstrap.Modal(document.getElementById('historyModal'));
-    modal.show();
-}
-
-function showAlert(message, type) {
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    alert.style.top = '20px';
-    alert.style.right = '20px';
-    alert.style.zIndex = '9999';
-    alert.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
-    `;
-    document.body.appendChild(alert);
-    
-    setTimeout(() => {
-        alert.remove();
-    }, 3000);
-}
-
-function initializeFormValidation() {
-    const form = document.getElementById('simulationForm');
-    
-    form.addEventListener('input', function(e) {
-        const input = e.target;
-        if (input.name === 'credit_score') {
-            updateScoreBar(parseInt(input.value || 300));
-        }
-    });
-}
-
-function updateScoreBar(score) {
-    const bar = document.getElementById('scoreBar');
-    const percentage = ((score - 300) / (850 - 300)) * 100;
-    bar.style.width = Math.max(0, Math.min(100, percentage)) + '%';
-    
-    if (score < 580) {
-        bar.className = 'progress-bar bg-danger';
-    } else if (score < 670) {
-        bar.className = 'progress-bar bg-warning';
-    } else if (score < 740) {
-        bar.className = 'progress-bar bg-info';
-    } else {
-        bar.className = 'progress-bar bg-success';
-    }
-}
-
-
-updateScoreBar(300);
-</script>
+<script src="{{ url_for('static', filename='js/simulation.js') }}"></script>
 {% endblock %}
