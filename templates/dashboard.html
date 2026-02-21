@@ -39,6 +39,10 @@
                 <i class="bi bi-people"></i>
                 <span>Base Clients</span>
             </a>
+            <a href="{{ url_for('pipeline') }}" class="nav-item {% if request.endpoint == 'pipeline' %}active{% endif %}">
+                <i class="bi bi-diagram-3"></i>
+                <span>Pipeline</span>
+            </a>
         </nav>
 
         <div class="sidebar-footer">

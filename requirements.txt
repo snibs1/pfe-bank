@@ -1,0 +1,9 @@
+Flask
+Flask-SQLAlchemy
+numpy
+scikit-learn
+xgboost
+lightgbm
+joblib
+pandas
+psycopg2-binary

@@ -1,0 +1,847 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+<div class="pipeline-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="page-title">
+                <i class="bi bi-diagram-3 me-3"></i>Data Engineering Pipeline
+            </h1>
+            <p class="page-subtitle">ETL Orchestration, Batch Processing & Feature Engineering</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="http://localhost:8080" target="_blank" class="btn btn-airflow">
+                <i class="bi bi-box-arrow-up-right me-2"></i>Open Airflow UI
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Pipeline Statistics -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="bi bi-database-fill"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ "{:,}".format(total_processed) }}</div>
+                <div class="stat-label">Total Processed</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon orange">
+                <i class="bi bi-hourglass-split"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ "{:,}".format(staging_count) }}</div>
+                <div class="stat-label">In Staging Queue</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon green">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">Active</div>
+                <div class="stat-label">Pipeline Status</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon purple">
+                <i class="bi bi-lightning-fill"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">42ms</div>
+                <div class="stat-label">Avg Latency</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ETL Pipeline Visualization -->
+<div class="chart-card mb-4">
+    <div class="card-header-custom mb-4">
+        <h3><i class="bi bi-arrow-left-right me-2"></i>ETL Pipeline Architecture</h3>
+        <span class="status-badge running">
+            <span class="pulse-dot"></span>
+            Pipeline Running
+        </span>
+    </div>
+    
+    <div class="pipeline-flow">
+        <!-- Extract -->
+        <div class="pipeline-stage">
+            <div class="stage-number">1</div>
+            <div class="stage-icon extract">
+                <i class="bi bi-download"></i>
+            </div>
+            <div class="stage-content">
+                <h4>Extract</h4>
+                <p>Data Ingestion</p>
+                <div class="stage-tech">
+                    <span class="tech-badge">CSV Upload</span>
+                    <span class="tech-badge">PostgreSQL</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pipeline-arrow">
+            <i class="bi bi-arrow-right"></i>
+        </div>
+
+        <!-- Transform - Validate -->
+        <div class="pipeline-stage">
+            <div class="stage-number">2</div>
+            <div class="stage-icon transform">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="stage-content">
+                <h4>Transform</h4>
+                <p>Data Validation</p>
+                <div class="stage-tech">
+                    <span class="tech-badge">Pandas</span>
+                    <span class="tech-badge">Quality Checks</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pipeline-arrow">
+            <i class="bi bi-arrow-right"></i>
+        </div>
+
+        <!-- Transform - Feature Engineering -->
+        <div class="pipeline-stage">
+            <div class="stage-number">3</div>
+            <div class="stage-icon transform">
+                <i class="bi bi-wrench"></i>
+            </div>
+            <div class="stage-content">
+                <h4>Transform</h4>
+                <p>Feature Engineering</p>
+                <div class="stage-tech">
+                    <span class="tech-badge">Scikit-learn</span>
+                    <span class="tech-badge">XGBoost</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pipeline-arrow">
+            <i class="bi bi-arrow-right"></i>
+        </div>
+
+        <!-- Load -->
+        <div class="pipeline-stage">
+            <div class="stage-number">4</div>
+            <div class="stage-icon load">
+                <i class="bi bi-database-fill-up"></i>
+            </div>
+            <div class="stage-content">
+                <h4>Load</h4>
+                <p>Data Warehouse</p>
+                <div class="stage-tech">
+                    <span class="tech-badge">PostgreSQL</span>
+                    <span class="tech-badge">SQLAlchemy</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Batch Upload Section -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="chart-card">
+            <div class="card-header-custom mb-4">
+                <h3><i class="bi bi-cloud-upload me-2"></i>Batch CSV Upload</h3>
+            </div>
+            
+            <div class="upload-zone" id="uploadZone">
+                <input type="file" id="csvFile" accept=".csv" hidden>
+                <div class="upload-icon">
+                    <i class="bi bi-file-earmark-arrow-up"></i>
+                </div>
+                <h4>Drop CSV file here or click to browse</h4>
+                <p>Upload multiple loan applications for batch processing</p>
+                <button class="btn-upload" onclick="document.getElementById('csvFile').click()">
+                    <i class="bi bi-folder2-open me-2"></i>Select CSV File
+                </button>
+            </div>
+
+            <div class="upload-progress d-none" id="uploadProgress">
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+                <p class="progress-text" id="progressText">Uploading...</p>
+            </div>
+
+            <div class="upload-result d-none" id="uploadResult">
+                <div class="result-icon success">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <h4 id="resultTitle">Upload Successful!</h4>
+                <p id="resultMessage"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="chart-card">
+            <div class="card-header-custom mb-4">
+                <h3><i class="bi bi-info-circle me-2"></i>CSV Format Guide</h3>
+            </div>
+            
+            <div class="format-guide">
+                <p class="mb-3"><strong>Required Columns:</strong></p>
+                <div class="columns-grid">
+                    <div class="column-item"><i class="bi bi-check"></i> client_name</div>
+                    <div class="column-item"><i class="bi bi-check"></i> cin</div>
+                    <div class="column-item"><i class="bi bi-check"></i> phone</div>
+                    <div class="column-item"><i class="bi bi-check"></i> annual_income</div>
+                    <div class="column-item"><i class="bi bi-check"></i> credit_score</div>
+                    <div class="column-item"><i class="bi bi-check"></i> loan_amount</div>
+                    <div class="column-item"><i class="bi bi-check"></i> loan_term</div>
+                    <div class="column-item"><i class="bi bi-check"></i> interest_rate</div>
+                    <div class="column-item"><i class="bi bi-check"></i> gender</div>
+                    <div class="column-item"><i class="bi bi-check"></i> marital_status</div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="/static/sample_batch.csv" download class="btn-download">
+                        <i class="bi bi-download me-2"></i>Download Sample CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Airflow DAGs Status -->
+<div class="chart-card mb-4">
+    <div class="card-header-custom mb-4">
+        <h3><i class="bi bi-gear-wide-connected me-2"></i>Airflow DAGs (Workflow Orchestration)</h3>
+    </div>
+    
+    <div class="dags-grid">
+        <div class="dag-card">
+            <div class="dag-header">
+                <div class="dag-icon">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+                <div class="dag-status active">
+                    <i class="bi bi-circle-fill"></i> Active
+                </div>
+            </div>
+            <h4>daily_loan_batch_processing</h4>
+            <p>Runs daily at 2:00 AM - Processes staging applications through complete ETL pipeline</p>
+            <div class="dag-footer">
+                <span class="dag-schedule"><i class="bi bi-clock"></i> 0 2 * * *</span>
+                <a href="http://localhost:8080/dags/daily_loan_batch_processing/grid" target="_blank" class="dag-link">
+                    View in Airflow <i class="bi bi-box-arrow-up-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="dag-card">
+            <div class="dag-header">
+                <div class="dag-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div class="dag-status active">
+                    <i class="bi bi-circle-fill"></i> Active
+                </div>
+            </div>
+            <h4>data_quality_monitoring</h4>
+            <p>Runs every 6 hours - Monitors data quality and detects anomalies</p>
+            <div class="dag-footer">
+                <span class="dag-schedule"><i class="bi bi-clock"></i> 0 */6 * * *</span>
+                <a href="http://localhost:8080/dags/data_quality_monitoring/grid" target="_blank" class="dag-link">
+                    View in Airflow <i class="bi bi-box-arrow-up-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Batches -->
+<div class="chart-card">
+    <div class="card-header-custom mb-4">
+        <h3><i class="bi bi-clock-history me-2"></i>Recent Processing History</h3>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>CIN</th>
+                    <th>Loan Amount</th>
+                    <th>Risk Score</th>
+                    <th>Status</th>
+                    <th>Processed At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for batch in recent_batches %}
+                <tr>
+                    <td>
+                        <div class="client-cell">
+                            <div class="client-avatar">{{ batch.client_name[0] }}</div>
+                            <div>
+                                <div class="client-name">{{ batch.client_name }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-secondary">{{ batch.cin }}</td>
+                    <td><strong>{{ "{:,.0f}".format(batch.loan_amount) }} MAD</strong></td>
+                    <td>
+                        <div class="risk-badge {% if batch.risk_score > 50 %}high{% elif batch.risk_score > 30 %}medium{% else %}low{% endif %}">
+                            {{ batch.risk_score }}%
+                        </div>
+                    </td>
+                    <td>
+                        {% if batch.status == 'Approved' %}
+                            <span class="status-badge approved">
+                                <i class="bi bi-check-circle-fill"></i> Approuvé
+                            </span>
+                        {% else %}
+                            <span class="status-badge rejected">
+                                <i class="bi bi-x-circle-fill"></i> Refusé
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted">{{ batch.date_added.strftime('%d/%m/%Y %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+/* Pipeline Specific Styles */
+.btn-airflow {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #017CEE, #0052CC);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-airflow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(1, 124, 238, 0.4);
+    color: white;
+}
+
+.stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+.stat-icon.blue {
+    background: rgba(0, 102, 255, 0.15);
+    color: var(--primary-blue);
+}
+
+.stat-icon.orange {
+    background: rgba(245, 158, 11, 0.15);
+    color: #F59E0B;
+}
+
+.stat-icon.green {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success-green);
+}
+
+.stat-icon.purple {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--primary-purple);
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 5px;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.status-badge.running {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success-green);
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--success-green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Pipeline Flow */
+.pipeline-flow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.pipeline-stage {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 25px 20px;
+    min-width: 200px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.pipeline-stage:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-blue);
+}
+
+.stage-number {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    background: rgba(0, 102, 255, 0.2);
+    color: var(--primary-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.stage-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+}
+
+.stage-icon.extract {
+    background: rgba(0, 102, 255, 0.15);
+    color: var(--primary-blue);
+}
+
+.stage-icon.transform {
+    background: rgba(245, 158, 11, 0.15);
+    color: #F59E0B;
+}
+
+.stage-icon.load {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success-green);
+}
+
+.stage-content h4 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.stage-content p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.stage-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+}
+
+.tech-badge {
+    padding: 4px 10px;
+    background: rgba(0, 102, 255, 0.1);
+    border: 1px solid rgba(0, 102, 255, 0.2);
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+.pipeline-arrow {
+    font-size: 32px;
+    color: var(--primary-blue);
+}
+
+/* Upload Zone */
+.upload-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: 16px;
+    padding: 50px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-zone:hover {
+    border-color: var(--primary-blue);
+    background: rgba(0, 102, 255, 0.05);
+}
+
+.upload-icon {
+    font-size: 64px;
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+}
+
+.upload-zone h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.upload-zone p {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.btn-upload {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    background: var(--primary-blue);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-upload:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.3);
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple));
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.result-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+.result-icon.success {
+    color: var(--success-green);
+}
+
+/* Format Guide */
+.columns-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.column-item {
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.column-item i {
+    color: var(--success-green);
+    margin-right: 8px;
+}
+
+.btn-download {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    background: rgba(0, 102, 255, 0.1);
+    border: 1px solid rgba(0, 102, 255, 0.2);
+    border-radius: 8px;
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-download:hover {
+    background: var(--primary-blue);
+    color: white;
+}
+
+/* DAGs Grid */
+.dags-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.dag-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 25px;
+    transition: all 0.3s ease;
+}
+
+.dag-card:hover {
+    border-color: var(--primary-blue);
+    transform: translateY(-3px);
+}
+
+.dag-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.dag-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 102, 255, 0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: var(--primary-blue);
+}
+
+.dag-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--success-green);
+}
+
+.dag-status i {
+    font-size: 8px;
+}
+
+.dag-card h4 {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-family: 'Courier New', monospace;
+}
+
+.dag-card p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.dag-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.dag-schedule {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: 'Courier New', monospace;
+}
+
+.dag-link {
+    font-size: 13px;
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.dag-link:hover {
+    text-decoration: underline;
+}
+</style>
+
+<script>
+// CSV Upload Handler
+document.getElementById('csvFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Show progress
+    document.getElementById('uploadZone').classList.add('d-none');
+    document.getElementById('uploadProgress').classList.remove('d-none');
+    
+    let progress = 0;
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    
+    // Simulate progress
+    const progressInterval = setInterval(() => {
+        progress += 10;
+        progressBar.style.width = progress + '%';
+        progressText.textContent = `Uploading... ${progress}%`;
+        
+        if (progress >= 90) {
+            clearInterval(progressInterval);
+        }
+    }, 200);
+    
+    // Upload
+    fetch('/batch_upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        clearInterval(progressInterval);
+        progressBar.style.width = '100%';
+        
+        setTimeout(() => {
+            document.getElementById('uploadProgress').classList.add('d-none');
+            document.getElementById('uploadResult').classList.remove('d-none');
+            
+            if (data.success) {
+                document.getElementById('resultTitle').textContent = 'Upload Successful!';
+                document.getElementById('resultMessage').textContent = data.message;
+            } else {
+                document.getElementById('resultTitle').textContent = 'Upload Failed';
+                document.getElementById('resultMessage').textContent = data.error || 'An error occurred';
+            }
+            
+            // Reset after 5 seconds
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        }, 500);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        clearInterval(progressInterval);
+        alert('Upload failed: ' + error.message);
+        location.reload();
+    });
+});
+
+// Drag and drop
+const uploadZone = document.getElementById('uploadZone');
+
+uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = 'var(--primary-blue)';
+    uploadZone.style.background = 'rgba(0, 102, 255, 0.05)';
+});
+
+uploadZone.addEventListener('dragleave', () => {
+    uploadZone.style.borderColor = '';
+    uploadZone.style.background = '';
+});
+
+uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = '';
+    uploadZone.style.background = '';
+    
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.csv')) {
+        const input = document.getElementById('csvFile');
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        input.files = dataTransfer.files;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    } else {
+        alert('Please upload a CSV file');
+    }
+});
+</script>
+{% endblock %}

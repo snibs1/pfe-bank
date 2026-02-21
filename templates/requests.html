@@ -70,20 +70,19 @@
                     </td>
                     <td class="text-muted">{{ client.date_added.strftime('%d/%m/%Y') }}</td>
                     <td>
-                        <button class="btn-view" onclick='showClientModal({{ client.id }}, {
-                            "id": {{ client.id }},
-                            "client_name": "{{ client.client_name }}",
-                            "cin": "{{ client.cin }}",
-                            "phone": "{{ client.phone or "N/A" }}",
-                            "annual_income": {{ client.annual_income }},
-                            "credit_score": {{ client.credit_score }},
-                            "loan_amount": {{ client.loan_amount }},
-                            "loan_term": {{ client.loan_term }},
-                            "interest_rate": {{ client.interest_rate }},
-                            "risk_score": {{ client.risk_score }},
-                            "status": "{{ client.status }}",
-                            "date_added": "{{ client.date_added.isoformat() }}"
-                        })'>
+                        <button class="btn-view show-client-btn"
+                            data-id="{{ client.id }}"
+                            data-client-name="{{ client.client_name }}"
+                            data-cin="{{ client.cin }}"
+                            data-phone="{{ client.phone or 'N/A' }}"
+                            data-annual-income="{{ client.annual_income }}"
+                            data-credit-score="{{ client.credit_score }}"
+                            data-loan-amount="{{ client.loan_amount }}"
+                            data-loan-term="{{ client.loan_term }}"
+                            data-interest-rate="{{ client.interest_rate }}"
+                            data-risk-score="{{ client.risk_score }}"
+                            data-status="{{ client.status }}"
+                            data-date-added="{{ client.date_added.isoformat() }}">
                             <i class="bi bi-eye"></i> Détails
                         </button>
                     </td>

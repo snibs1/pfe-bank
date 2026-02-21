@@ -38,36 +38,60 @@ function updateScoreBar(val) {
 
 
 function fillSampleData() {
-    console.log("Filling sample data...");
-    
-    const sampleData = {
-        client_name: 'Ahmed Benani', 
-        cin: 'AB123456', 
-        phone: '0661123456',
-        annual_income: 600000, 
-        credit_score: 750, 
-        debt_to_income_ratio: 28.5,
-        loan_amount: 300000, 
-        loan_term: 72, 
-        interest_rate: 4.20,
-        gender: 'Male', 
-        marital_status: 'Married',
-        loan_purpose: 'Home'
+    console.log("Filling random sample data...");
+
+    const firstNames = ['Ahmed', 'Fatima', 'Mohammed', 'Khadija', 'Youssef', 'Amina', 'Hassan', 'Zineb', 'Omar', 'Salma'];
+    const lastNames = ['Benani', 'Alaoui', 'Idrissi', 'Fassi', 'Tazi', 'Benjelloun', 'Chraibi', 'Lahlou', 'Berrada', 'Squalli'];
+    const purposes = ['Personal', 'Business', 'Home', 'Car', 'Education'];
+    const genders = ['Male', 'Female'];
+    const marital = ['Single', 'Married', 'Divorced'];
+    const terms = [12, 24, 36, 48, 60, 72, 84];
+
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const randFloat = (min, max, decimals = 1) => {
+        const v = Math.random() * (max - min) + min;
+        return parseFloat(v.toFixed(decimals));
     };
 
-    
+    const fname = firstNames[rand(0, firstNames.length - 1)];
+    const lname = lastNames[rand(0, lastNames.length - 1)];
+    const chosenPurpose = purposes[rand(0, purposes.length - 1)];
+    const creditScore = rand(500, 850);
+
+    const sampleData = {
+        client_name: `${fname} ${lname}`,
+        cin: `${String.fromCharCode(65 + rand(0,25))}${String.fromCharCode(65 + rand(0,25))}${rand(100000,999999)}`,
+        phone: `06${rand(10,99)}${rand(100,999)}${rand(100,999)}`,
+        annual_income: rand(200000, 1000000),
+        credit_score: creditScore,
+        debt_to_income_ratio: randFloat(10,45,1),
+        loan_amount: rand(50000, 500000),
+        loan_term: terms[rand(0, terms.length - 1)],
+        interest_rate: randFloat(3.5, 8.5, 2),
+        gender: genders[rand(0, genders.length - 1)],
+        marital_status: marital[rand(0, marital.length - 1)],
+        loan_purpose: chosenPurpose
+    };
+
     for (const [key, value] of Object.entries(sampleData)) {
         const input = document.querySelector(`[name="${key}"]`);
         if (input) {
             input.value = value;
-            
             input.style.transition = "background 0.3s";
             input.style.backgroundColor = "rgba(56, 189, 248, 0.2)";
             setTimeout(() => input.style.backgroundColor = "", 300);
         }
     }
-    
-    updateScoreBar(750);
+
+    // Ensure interest rate matches selected purpose mapping, with a small random tweak
+    autoFillInterestRate();
+    const irInput = document.querySelector('input[name="interest_rate"]');
+    if (irInput) {
+        const tweak = randFloat(-0.2, 0.2, 2);
+        irInput.value = Math.max(0, parseFloat(irInput.value) + tweak).toFixed(2);
+    }
+
+    updateScoreBar(creditScore);
 }
 
 

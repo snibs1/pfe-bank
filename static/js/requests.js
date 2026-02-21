@@ -182,3 +182,27 @@ function downloadPDF() {
         document.body.removeChild(element);
     });
 }
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.show-client-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const d = btn.dataset;
+            const clientData = {
+                id: parseInt(d.id) || 0,
+                client_name: d.clientName || '',
+                cin: d.cin || '',
+                phone: d.phone || 'N/A',
+                annual_income: parseFloat(d.annualIncome) || 0,
+                credit_score: parseInt(d.creditScore) || 0,
+                loan_amount: parseFloat(d.loanAmount) || 0,
+                loan_term: parseInt(d.loanTerm) || 0,
+                interest_rate: parseFloat(d.interestRate) || 0,
+                risk_score: parseFloat(d.riskScore) || 0,
+                status: d.status || '',
+                date_added: d.dateAdded || ''
+            };
+            showClientModal(clientData.id, clientData);
+        });
+    });
+});
