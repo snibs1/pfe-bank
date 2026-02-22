@@ -1,5 +1,5 @@
 services:
-  # 1. PostgreSQL Database
+ 
   db:
     image: postgres:15
     container_name: bank_postgres
@@ -20,7 +20,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 2. Flask Web Application
+  
   web:
     build: .
     container_name: credit_risk_app
@@ -42,7 +42,7 @@ services:
       - bank_network
     command: python app.py
 
-  # 3. Apache Airflow (Orchestrator)
+  
   airflow:
     build:
       context: .

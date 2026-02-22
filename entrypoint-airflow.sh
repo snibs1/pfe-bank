@@ -1,11 +1,11 @@
-#!/bin/bash
+
 set -e
 
 echo "======================================"
 echo "Airflow Container - Startup Script"
 echo "======================================"
 
-# Wait for database to be ready
+
 echo "Waiting for PostgreSQL to be ready..."
 max_attempts=30
 attempt=1
@@ -23,13 +23,13 @@ done
 echo "✅ PostgreSQL is ready!"
 echo ""
 
-# Initialize Airflow database
+
 echo "Initializing Airflow database..."
 airflow db migrate
 echo "✅ Database migration complete"
 echo ""
 
-# Create default admin user (if it doesn't exist)
+
 echo "Creating default admin user..."
 airflow users create \
     --username admin \
@@ -41,16 +41,16 @@ airflow users create \
     2>/dev/null || echo "⚠️  User already exists (or creation failed)"
 echo ""
 
-# Start Airflow webserver and scheduler
+
 echo "Starting Airflow webserver and scheduler..."
 echo "======================================"
 
-# Start webserver in background
+
 airflow webserver --port 8080 &
 WEBSERVER_PID=$!
 
-# Start scheduler in foreground
+
 airflow scheduler
 
-# If scheduler exits, kill webserver
+
 kill $WEBSERVER_PID 2>/dev/null || true

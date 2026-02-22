@@ -16,10 +16,10 @@ from sqlalchemy import func
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# ربط التطبيق مع قاعدة البيانات
+
 db.init_app(app)
 
-# Airflow connection (from environment)
+
 AIRFLOW_HOST = os.environ.get('AIRFLOW_HOST', 'http://localhost:8080')
 AIRFLOW_USER = os.environ.get('AIRFLOW_USER', 'admin')
 AIRFLOW_PASS = os.environ.get('AIRFLOW_PASS', 'admin')
@@ -35,7 +35,7 @@ def trigger_airflow_dag(dag_id='daily_loan_batch_processing', conf=None):
     except Exception as e:
         return False, str(e)
 
-# --- تحميل موديلات الذكاء الاصطناعي ---
+
 model = None
 scaler = None
 try:
@@ -51,7 +51,7 @@ except Exception as e:
     scaler = None
     app.logger.error(f"❌ ML model load failed: {e}")
 
-# --- ROUTES ---
+
 
 @app.route('/')
 def login_page():
@@ -91,17 +91,17 @@ def simulation():
 @app.route('/pipeline')
 def pipeline():
     total_processed = Simulation.query.count()
-    # جلب عدد الطلبات المنتظرة في Staging (غير معالجة)
+    
     try:
         res = db.session.execute(text("SELECT COUNT(*) FROM staging_applications WHERE processed = FALSE"))
         staging_count = int(res.fetchone()[0])
     except Exception:
         staging_count = 0
 
-    # عرض آخر السجلات المعالجة في الـ production
+    
     recent_batches = Simulation.query.order_by(Simulation.date_added.desc()).limit(10).all()
 
-    # جلب أحدث السجلات من جدول staging لعرضها في الواجهة
+    
     try:
         staging_res = db.session.execute(text("SELECT id, client_name, cin, uploaded_at FROM staging_applications ORDER BY uploaded_at DESC LIMIT 10"))
         recent_staging = [dict(row) for row in staging_res.fetchall()]
@@ -114,7 +114,7 @@ def pipeline():
                          recent_batches=recent_batches,
                          recent_staging=recent_staging)
 
-# تعديل الرابط ليتوافق مع fetch('/batch_process') في الـ HTML
+
 @app.route('/batch_process', methods=['POST'])
 def batch_process():
     if 'file' not in request.files:
@@ -131,7 +131,7 @@ def batch_process():
         staging_ids = []
 
         for row in csv_data:
-            # insert raw row into staging_applications for Airflow ETL to pick up
+            
             sql = text("""
                 INSERT INTO staging_applications
                 (client_name, cin, phone, annual_income, debt_to_income_ratio, credit_score,
@@ -167,7 +167,7 @@ def batch_process():
 
         db.session.commit()
 
-        # trigger airflow DAG to process the staging rows (best-effort)
+        
         try:
             ok, info = trigger_airflow_dag(conf={'staging_ids': staging_ids})
         except Exception as e:
@@ -180,10 +180,10 @@ def batch_process():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-# Backwards-compatible endpoint used by the frontend upload widget
+
 @app.route('/batch_upload', methods=['POST'])
 def batch_upload():
-    # reuse existing batch processing logic
+    
     return batch_process()
 
 @app.route('/predict', methods=['POST'])
@@ -212,8 +212,7 @@ def predict():
             features = np.hstack([features, padding])
             
         features_scaled = scaler.transform(features)
-        # model.predict_proba[:,1] is probability of class '1' (loan_paid_back = Yes)
-        # In the training notebook 1 = loan paid back (good). Convert to risk of default.
+       
         proba_paid = model.predict_proba(features_scaled)[0][1] * 100
         risk_of_default = round(100.0 - proba_paid, 2)
         final_status = 'Approved' if proba_paid >= 50 else 'Rejected'
@@ -227,7 +226,7 @@ def predict():
             loan_amount=float(data.get('loan_amount', 0)),
             loan_term=int(data.get('loan_term', 0)),
             interest_rate=float(data.get('interest_rate', 0)),
-            risk_score=float(risk_of_default), # probability of default (0-100)
+            risk_score=float(risk_of_default),
             status=final_status
         )
         

@@ -1,10 +1,10 @@
--- إنشاء قاعدة بيانات Airflow
+
 CREATE DATABASE airflow_db;
 
--- الاتصال بقاعدة بيانات البنك
+
 \c bank_warehouse;
 
--- جدول تطبيقات القروض (Staging) للـ Batch Processing
+-
 CREATE TABLE IF NOT EXISTS staging_applications (
     id SERIAL PRIMARY KEY,
     client_name VARCHAR(100),
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS staging_applications (
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- جدول المحاكاة النهائي (Production)
+
 CREATE TABLE IF NOT EXISTS simulations (
     id SERIAL PRIMARY KEY,
     client_name VARCHAR(100),

@@ -2,7 +2,7 @@ FROM apache/airflow:2.7.1-python3.9
 
 USER root
 
-# تثبيت مكتبات النظام الضرورية لـ PostgreSQL و XGBoost
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
@@ -14,8 +14,7 @@ RUN apt-get update && \
 
 USER airflow
 
-# تثبيت المكتبات مباشرة (بدون ملف خارجي لتجنب الأخطاء)
-# نستخدم نفس الإصدارات من requirements.txt لضمان توافق النموذج
+
 RUN pip install --no-cache-dir \
     numpy==1.26.4 \
     pandas==2.0.3 \

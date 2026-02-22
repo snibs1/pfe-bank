@@ -1,8 +1,3 @@
-"""
-NB BANK - Daily Batch Processing Pipeline
-ETL: Extract → Transform → Load
-Runs every day at 2 AM
-"""
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -11,7 +6,7 @@ import pandas as pd
 import psycopg2
 import numpy as np
 
-# Database connection parameters
+
 DB_CONFIG = {
     'host': 'db',
     'database': 'bank_warehouse',
@@ -19,7 +14,7 @@ DB_CONFIG = {
     'password': 'pfe_password'
 }
 
-# Default arguments for the DAG
+
 default_args = {
     'owner': 'nb_bank_data_engineering',
     'depends_on_past': False,
@@ -30,12 +25,12 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-# Create the DAG
+
 dag = DAG(
     'daily_loan_batch_processing',
     default_args=default_args,
     description='Daily ETL pipeline for loan application batch processing',
-    schedule_interval='0 2 * * *',  # 2 AM every day
+    schedule_interval='0 2 * * *',  
     catchup=False,
     tags=['etl', 'batch', 'ml', 'production'],
 )
@@ -50,7 +45,7 @@ def extract_new_applications(**context):
     
     conn = psycopg2.connect(**DB_CONFIG)
     
-    # Get unprocessed applications
+    
     query = """
         SELECT * FROM staging_applications 
         WHERE processed = FALSE
@@ -67,7 +62,7 @@ def extract_new_applications(**context):
         print("⚠️  No new applications to process. Pipeline will skip remaining tasks.")
         return "No new applications found"
     
-    # Save to XCom (pass data to next task)
+    
     context['ti'].xcom_push(key='raw_applications', value=df.to_json(orient='records'))
     
     return f"Extracted {record_count} applications"
@@ -81,7 +76,7 @@ def validate_and_clean_data(**context):
     print("🟡 TRANSFORM PHASE 1: Data Validation & Cleaning...")
     print("=" * 80)
     
-    # Get data from previous task
+    
     raw_json = context['ti'].xcom_pull(key='raw_applications', task_ids='extract_task')
     
     if raw_json is None:
@@ -93,19 +88,19 @@ def validate_and_clean_data(**context):
     
     print(f"📊 Initial record count: {initial_count}")
     
-    # Quality Check 1: Remove duplicates based on CIN
+    
     df = df.drop_duplicates(subset=['cin'], keep='first')
     duplicates_removed = initial_count - len(df)
     print(f"   ✓ Duplicates removed: {duplicates_removed}")
     
-    # Quality Check 2: Remove rows with missing critical values
+    
     critical_columns = ['annual_income', 'credit_score', 'loan_amount', 'client_name']
     before_null = len(df)
     df = df.dropna(subset=critical_columns)
     nulls_removed = before_null - len(df)
     print(f"   ✓ Records with missing values removed: {nulls_removed}")
     
-    # Quality Check 3: Validate data ranges
+    
     before_validation = len(df)
     df = df[df['credit_score'].between(300, 850)]
     df = df[df['annual_income'] > 0]
@@ -114,7 +109,7 @@ def validate_and_clean_data(**context):
     invalid_removed = before_validation - len(df)
     print(f"   ✓ Invalid range records removed: {invalid_removed}")
     
-    # Quality Check 4: Handle outliers (3 standard deviations)
+    
     numeric_cols = ['annual_income', 'loan_amount']
     for col in numeric_cols:
         mean = df[col].mean()
@@ -131,7 +126,7 @@ def validate_and_clean_data(**context):
     print(f"   Valid records: {cleaned_count}")
     print(f"   Total removed: {total_removed} ({total_removed/initial_count*100:.1f}%)")
     
-    # Save cleaned data
+    
     context['ti'].xcom_push(key='cleaned_applications', value=df.to_json(orient='records'))
     context['ti'].xcom_push(key='quality_stats', value={
         'initial': initial_count,
@@ -152,7 +147,7 @@ def feature_engineering_and_ml_prediction(**context):
     print("🟢 TRANSFORM PHASE 2: Feature Engineering & ML Predictions...")
     print("=" * 80)
     
-    # Get cleaned data
+    
     clean_json = context['ti'].xcom_pull(key='cleaned_applications', task_ids='validate_task')
     
     if clean_json is None:
@@ -165,22 +160,20 @@ def feature_engineering_and_ml_prediction(**context):
     model=None
     scaler=None
 
-    
-    # Load ML model and scaler (lazy import to avoid import errors at DAG parse time)
     try:
         import joblib
         model = joblib.load('/opt/airflow/models/loan_prediction_model.pkl')
         scaler = joblib.load('/opt/airflow/models/data_scaler.pkl')
     except Exception as e:
         print(f"⚠️  ML model or joblib not available: {e}")
-        # Push empty predictions so downstream tasks can skip
+        
         context['ti'].xcom_push(key='predictions', value=[])
         return "ML skipped"
     
     predictions = []
     
     for idx, row in df.iterrows():
-        # Feature Engineering
+        
         model_inputs = [
             float(row['annual_income']),
             float(row.get('debt_to_income_ratio', 30)),
@@ -192,10 +185,10 @@ def feature_engineering_and_ml_prediction(**context):
             1 if row.get('education_level', 'High School') == 'Graduate' else 0,
             1 if row.get('employment_status', 'Unemployed') == 'Employed' else 0,
             1 if row.get('loan_purpose', 'Personal') == 'Business' else 0,
-            1, 0, 1  # Fixed features
+            1, 0, 1  
         ]
         
-        # Scale features
+        
         features = np.array([model_inputs])
         if scaler.n_features_in_ > len(model_inputs):
             padding = np.zeros((1, scaler.n_features_in_ - len(model_inputs)))
@@ -203,8 +196,8 @@ def feature_engineering_and_ml_prediction(**context):
         
         features_scaled = scaler.transform(features)
         
-        # Predict
-        # model.predict_proba[:,1] => probability that loan will be paid back (class 1 in training)
+        
+        
         proba_paid = model.predict_proba(features_scaled)[0][1] * 100
         risk_score = round(100.0 - proba_paid, 2)
         final_status = 'Approved' if proba_paid >= 50 else 'Rejected'
@@ -231,7 +224,7 @@ def feature_engineering_and_ml_prediction(**context):
     print(f"   ✅ Approved: {approved} ({approved/len(predictions)*100:.1f}%)")
     print(f"   ❌ Rejected: {rejected} ({rejected/len(predictions)*100:.1f}%)")
     
-    # Save predictions
+    
     context['ti'].xcom_push(key='predictions', value=predictions)
     
     return f"Processed {len(predictions)} predictions"
@@ -245,7 +238,7 @@ def load_to_production_database(**context):
     print("🔵 LOAD PHASE: Saving results to production database...")
     print("=" * 80)
     
-    # Get predictions
+    
     predictions = context['ti'].xcom_pull(key='predictions', task_ids='ml_task')
     
     if predictions is None or len(predictions) == 0:
@@ -260,7 +253,7 @@ def load_to_production_database(**context):
     
     for pred in predictions:
         try:
-            # Insert into simulations table
+            
             cursor.execute("""
                 INSERT INTO simulations 
                 (client_name, cin, phone, annual_income, credit_score, 
@@ -285,7 +278,7 @@ def load_to_production_database(**context):
         except Exception as e:
             print(f"❌ Error loading record: {e}")
     
-    # Mark staging records as processed
+    
     if staging_ids:
         cursor.execute("""
             UPDATE staging_applications 
@@ -303,7 +296,7 @@ def load_to_production_database(**context):
     return f"Loaded {loaded} records"
 
 
-# Define tasks
+
 extract_task = PythonOperator(
     task_id='extract_task',
     python_callable=extract_new_applications,
@@ -328,5 +321,4 @@ load_task = PythonOperator(
     dag=dag,
 )
 
-# Define ETL pipeline flow
 extract_task >> validate_task >> ml_task >> load_task

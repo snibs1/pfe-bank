@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import psycopg2
 import pandas as pd
 
-# Database connection
+
 DB_CONFIG = {
     'host': 'db',
     'database': 'bank_warehouse',
@@ -29,7 +29,7 @@ dag = DAG(
     'data_quality_monitoring',
     default_args=default_args,
     description='Monitor data quality issues in production database',
-    schedule_interval='0 */6 * * *',  # Every 6 hours
+    schedule_interval='0 */6 * * *',  
     catchup=False,
     tags=['quality', 'monitoring', 'validation'],
 )
@@ -41,7 +41,7 @@ def check_missing_values(**context):
     conn = psycopg2.connect(**DB_CONFIG)
     cursor = conn.cursor()
     
-    # Check each critical column
+    
     checks = {
         'client_name': "SELECT COUNT(*) FROM simulations WHERE client_name IS NULL OR client_name = ''",
         'cin': "SELECT COUNT(*) FROM simulations WHERE cin IS NULL OR cin = ''",
@@ -92,7 +92,7 @@ def check_duplicates(**context):
     
     if dup_count > 0:
         print(f"   ⚠️  Found {dup_count} duplicate CINs:")
-        for cin, count in duplicates[:5]:  # Show first 5
+        for cin, count in duplicates[:5]:  
             print(f"      - {cin}: {count} occurrences")
     else:
         print("   ✅ No duplicate CINs found")
@@ -111,13 +111,13 @@ def check_outliers(**context):
     
     conn = psycopg2.connect(**DB_CONFIG)
     
-    # Get data
+    
     df = pd.read_sql("SELECT annual_income, loan_amount, credit_score FROM simulations", conn)
     conn.close()
     
     outliers = {}
     
-    # Check each numeric column
+    
     for col in ['annual_income', 'loan_amount', 'credit_score']:
         mean = df[col].mean()
         std = df[col].std()
@@ -167,7 +167,7 @@ def generate_quality_report(**context):
     return f"Quality check complete: {total_issues} issues"
 
 
-# Define tasks
+
 missing_task = PythonOperator(
     task_id='check_missing',
     python_callable=check_missing_values,
@@ -192,5 +192,5 @@ report_task = PythonOperator(
     dag=dag,
 )
 
-# All checks run in parallel, then generate report
+
 [missing_task, duplicates_task, outliers_task] >> report_task
