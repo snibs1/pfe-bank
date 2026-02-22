@@ -1,0 +1,121 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/requests.css') }}">
+
+<div class="clients-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-12">
+            <h1 class="page-title">
+                <i class="bi bi-people me-3"></i>Base de Données Clients
+            </h1>
+            <p class="page-subtitle">Historique complet des simulations et décisions de crédit</p>
+        </div>
+    </div>
+</div>
+
+<div class="chart-card">
+    <div class="card-header-custom mb-4">
+        <h3>Liste des Clients</h3>
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" placeholder="Rechercher un client..." onkeyup="filterTable()">
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="data-table" id="clientsTable">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>CIN</th>
+                    <th>Téléphone</th>
+                    <th>Montant</th>
+                    <th>Score Risque</th>
+                    <th>Statut</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients %}
+                <tr>
+                    <td>
+                        <div class="client-cell">
+                            <div class="client-avatar">{{ client.client_name[0] }}</div>
+                            <div>
+                                <div class="client-name">{{ client.client_name }}</div>
+                                <div class="client-id">ID: #{{ client.id }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-secondary">{{ client.cin }}</td>
+                    <td class="text-secondary">{{ client.phone or 'N/A' }}</td>
+                    <td><strong>{{ "{:,.0f}".format(client.loan_amount) }} MAD</strong></td>
+                    <td>
+                        <div class="risk-badge {% if client.risk_score > 50 %}high{% elif client.risk_score > 30 %}medium{% else %}low{% endif %}">
+                            {{ client.risk_score }}%
+                        </div>
+                    </td>
+                    <td>
+                        {% if client.status == 'Approved' %}
+                            <span class="status-badge approved">
+                                <i class="bi bi-check-circle-fill"></i> Approuvé
+                            </span>
+                        {% else %}
+                            <span class="status-badge rejected">
+                                <i class="bi bi-x-circle-fill"></i> Refusé
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted">{{ client.date_added.strftime('%d/%m/%Y') }}</td>
+                    <td>
+                        <button class="btn-view show-client-btn"
+                            data-id="{{ client.id }}"
+                            data-client-name="{{ client.client_name }}"
+                            data-cin="{{ client.cin }}"
+                            data-phone="{{ client.phone or 'N/A' }}"
+                            data-annual-income="{{ client.annual_income }}"
+                            data-credit-score="{{ client.credit_score }}"
+                            data-loan-amount="{{ client.loan_amount }}"
+                            data-loan-term="{{ client.loan_term }}"
+                            data-interest-rate="{{ client.interest_rate }}"
+                            data-risk-score="{{ client.risk_score }}"
+                            data-status="{{ client.status }}"
+                            data-date-added="{{ client.date_added.isoformat() }}">
+                            <i class="bi bi-eye"></i> Détails
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-file-earmark-person me-2"></i>
+                    Détails du Client
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" onclick="downloadPDF()">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Télécharger PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/requests.js') }}"></script>
+
+{% endblock %}

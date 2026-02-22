@@ -1,0 +1,171 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/client_detail.css') }}">
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <a href="{{ url_for('requests_list') }}" class="btn-back">
+        <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+    </a>
+    <button onclick="generatePDF('{{ client.client_name }}', '{{ client.date_added.strftime('%Y%m%d') }}')" class="btn-download">
+        <i class="bi bi-file-earmark-pdf me-2"></i>Télécharger le Rapport PDF
+    </button>
+</div>
+
+<div id="pdfContent">
+    <div class="report-card mb-4">
+        <div class="report-header">
+            <div>
+                <h1 class="report-title">Rapport d'Analyse de Crédit</h1>
+                <p class="report-ref">Référence: SIM-{{ "%04d"|format(client.id) }}</p>
+            </div>
+            <div class="report-logo">
+                <div class="logo-circle">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">NB BANK IA</h3>
+                    <small>{{ client.date_added.strftime('%d %B %Y') }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="info-section">
+                <h3 class="section-heading">
+                    <i class="bi bi-person-badge"></i>
+                    Informations Client
+                </h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Nom Complet</span>
+                        <span class="info-value">{{ client.client_name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">CIN</span>
+                        <span class="info-value">{{ client.cin }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Téléphone</span>
+                        <span class="info-value">{{ client.phone or 'Non renseigné' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Revenu Annuel</span>
+                        <span class="info-value">{{ "{:,.0f}".format(client.annual_income) }} MAD</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Score de Crédit</span>
+                        <span class="info-value">{{ client.credit_score }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="info-section">
+                <h3 class="section-heading">
+                    <i class="bi bi-bank"></i>
+                    Détails du Prêt
+                </h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Montant Demandé</span>
+                        <span class="info-value highlight-blue">{{ "{:,.0f}".format(client.loan_amount) }} MAD</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Durée</span>
+                        <span class="info-value">{{ client.loan_term }} Mois</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Taux d'Intérêt</span>
+                        <span class="info-value">{{ client.interest_rate }}%</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Mensualité Estimée</span>
+                        <span class="info-value">
+                            {% set monthly_rate = client.interest_rate / 100 / 12 %}
+                            {% set monthly_payment = client.loan_amount * monthly_rate * ((1 + monthly_rate) ** client.loan_term) / (((1 + monthly_rate) ** client.loan_term) - 1) %}
+                            {{ "{:,.0f}".format(monthly_payment) }} MAD
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="report-card mb-4">
+        <h3 class="section-heading mb-4">
+            <i class="bi bi-shield-exclamation"></i>
+            Analyse de Risque IA
+        </h3>
+        
+        <div class="risk-analysis">
+            <div class="risk-score-container">
+                <div class="risk-circle-large">
+                    <svg width="200" height="200">
+                        <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="15"></circle>
+                        <circle cx="100" cy="100" r="85" fill="none" 
+                            stroke="{% if client.risk_score > 50 %}#EF4444{% elif client.risk_score > 30 %}#F59E0B{% else %}#10B981{% endif %}" 
+                            stroke-width="15" 
+                            stroke-dasharray="534.07" 
+                            stroke-dashoffset="{{ 534.07 - (client.risk_score / 100 * 534.07) }}" 
+                            transform="rotate(-90 100 100)">
+                        </circle>
+                    </svg>
+                    <div class="risk-percentage">{{ client.risk_score }}%</div>
+                </div>
+                <div class="risk-info">
+                    <h4>Score de Risque</h4>
+                    <p class="risk-category {% if client.risk_score > 50 %}high{% elif client.risk_score > 30 %}medium{% else %}low{% endif %}">
+                        {% if client.risk_score > 50 %}
+                            Risque Élevé
+                        {% elif client.risk_score > 30 %}
+                            Risque Modéré
+                        {% else %}
+                            Risque Faible
+                        {% endif %}
+                    </p>
+                    <div class="model-badge">
+                        <i class="bi bi-cpu-fill"></i>
+                        Modèle: XGBoost v2.4
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="decision-section {% if client.status == 'Approved' %}approved{% else %}rejected{% endif %}">
+        <div class="decision-icon">
+            {% if client.status == 'Approved' %}
+                <i class="bi bi-check-circle-fill"></i>
+            {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+            {% endif %}
+        </div>
+        <div class="decision-content">
+            <h2 class="decision-title">
+                {% if client.status == 'Approved' %}
+                    CRÉDIT APPROUVÉ
+                {% else %}
+                    CRÉDIT REFUSÉ
+                {% endif %}
+            </h2>
+            <p class="decision-description">
+                {% if client.status == 'Approved' %}
+                    Le profil du client présente un niveau de risque acceptable ({{ client.risk_score }}%). 
+                    Le dossier de crédit est approuvé selon les conditions standards de la banque.
+                {% else %}
+                    Le profil présente un risque élevé ({{ client.risk_score }}%). 
+                    La demande de crédit ne peut être approuvée automatiquement. Une révision manuelle est recommandée.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/client_detail.js') }}"></script>
+
+{% endblock %}
